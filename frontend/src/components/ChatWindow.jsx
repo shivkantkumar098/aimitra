@@ -3,6 +3,7 @@ import Message from "./Message";
 import TypingIndicator from "./TypingIndicator";
 import WelcomeScreen from "./WelcomeScreen";
 import ChatInput from "./ChatInput";
+import { CAPABILITIES } from "../utils/capabilities";
 
 export default function ChatWindow({
   messages,
@@ -14,29 +15,39 @@ export default function ChatWindow({
   onNewChat,
 }) {
   const bottomRef = useRef(null);
+  const activeCapability = CAPABILITIES.find((c) => c.id === activeMode);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const handleExampleClick = (text) => {
-    onSend(text);
-  };
-
   return (
-    <main className="flex-1 flex flex-col h-screen overflow-hidden">
+    <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0a0a15]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-[#0d0d1a]">
-        <div>
-          <h2 className="text-sm font-semibold text-white">Chat</h2>
-          <p className="text-xs text-gray-500">{messages.length} message{messages.length !== 1 ? "s" : ""}</p>
+      <header className="flex items-center justify-between px-6 py-3.5 border-b border-gray-800/80 bg-[#0d0d1a] flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-white">
+              {activeCapability ? (
+                <span className="flex items-center gap-2">
+                  <span>{activeCapability.icon}</span>
+                  <span>{activeCapability.label}</span>
+                </span>
+              ) : "Chat"}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {messages.length === 0
+                ? activeCapability?.description ?? "Start a conversation"
+                : `${messages.length} message${messages.length !== 1 ? "s" : ""}`}
+            </p>
+          </div>
         </div>
         <button
           onClick={onNewChat}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-gray-200 text-xs rounded-xl border border-gray-700/60 transition-all"
         >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12h14" />
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
           </svg>
           New Chat
         </button>
@@ -48,10 +59,10 @@ export default function ChatWindow({
           <WelcomeScreen
             activeMode={activeMode}
             setActiveMode={setActiveMode}
-            onExampleClick={handleExampleClick}
+            onExampleClick={onSend}
           />
         ) : (
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-3xl mx-auto space-y-5">
             {messages.map((msg) => (
               <Message key={msg.id} message={msg} />
             ))}
@@ -65,14 +76,20 @@ export default function ChatWindow({
 
       {/* Error banner */}
       {error && (
-        <div className="mx-6 mb-2 px-4 py-2 bg-red-900/40 border border-red-700 rounded-lg text-red-300 text-sm">
-          ⚠ {error}
+        <div className="mx-6 mb-2 px-4 py-2.5 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-sm flex items-center gap-2 animate-slide-down">
+          <span>⚠</span>
+          <span>{error}</span>
         </div>
       )}
 
       {/* Input */}
       <div className="max-w-3xl mx-auto w-full">
-        <ChatInput onSend={onSend} isLoading={isLoading} activeMode={activeMode} />
+        <ChatInput
+          onSend={onSend}
+          isLoading={isLoading}
+          activeMode={activeMode}
+          setActiveMode={setActiveMode}
+        />
       </div>
     </main>
   );

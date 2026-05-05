@@ -1,15 +1,27 @@
-"""Prompt routing engine — maps capability mode to system prompt prefix."""
+"""
+Prompt routing engine.
 
+Each capability mode has two parts:
+  - system: sets the AI's persona/expertise for this mode
+  - prefix: prepended to the user's message to add structured instructions
+
+To add a new mode: add a new key here, then add matching entry in
+frontend/src/utils/capabilities.js
+"""
+
+# Maps capability mode ID → { system prompt, user message prefix }
 CAPABILITY_PROMPTS = {
     "text_generation": {
+        # General-purpose coding and writing assistant
         "system": (
             "You are an expert software engineer and technical writer. "
             "Provide clear, well-structured, and accurate responses. "
             "For code, use proper syntax highlighting and explain key concepts."
         ),
-        "prefix": "",
+        "prefix": "",  # No prefix — user message sent as-is
     },
     "dom_locator": {
+        # Specialized for generating XPath and CSS selectors for web automation
         "system": (
             "You are an expert in web automation and DOM element identification. "
             "Generate robust, maintainable XPath and CSS selectors. "
@@ -23,6 +35,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "test_generation": {
+        # Generates Selenium/Playwright test cases following POM pattern
         "system": (
             "You are a senior QA automation engineer specializing in Selenium and Playwright. "
             "Generate production-quality test cases with proper assertions, waits, and page objects. "
@@ -39,6 +52,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "test_plan": {
+        # Generates formal test plans following IEEE 829 structure
         "system": (
             "You are a senior QA lead with expertise in test planning and strategy. "
             "Create comprehensive, structured test plans following IEEE 829 standard. "
@@ -58,6 +72,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "debug": {
+        # Code review and debugging — explains root cause + provides fix
         "system": (
             "You are an expert debugger and code reviewer. "
             "Analyze code for bugs, performance issues, security vulnerabilities, and bad practices. "
@@ -73,6 +88,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "web_search": {
+        # Research assistant — structured responses with references
         "system": (
             "You are a research assistant with broad technical knowledge. "
             "Provide accurate, up-to-date information with references where possible. "
@@ -81,6 +97,7 @@ CAPABILITY_PROMPTS = {
         "prefix": "Research and provide detailed information about: ",
     },
     "image_generation": {
+        # Cannot generate images directly — describes them + provides tool prompts
         "system": (
             "You are a creative AI assistant. Since direct image generation is not available, "
             "describe in detail what the image would look like and suggest tools/prompts "
@@ -96,6 +113,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "jira": {
+        # Structures input into a properly formatted Jira ticket
         "system": (
             "You are a Jira expert and project management assistant. "
             "Help create well-structured Jira tickets, epics, and user stories "
@@ -113,6 +131,7 @@ CAPABILITY_PROMPTS = {
         ),
     },
     "jql": {
+        # Generates and explains Jira Query Language (JQL) queries
         "system": (
             "You are a Jira Query Language (JQL) expert. "
             "Generate precise, optimized JQL queries with explanations. "
@@ -130,7 +149,13 @@ CAPABILITY_PROMPTS = {
 
 
 def build_prompt(mode: str, user_input: str) -> tuple[str, str]:
-    """Returns (system_prompt, user_message) for the given mode."""
+    """
+    Returns (system_prompt, user_message) for the given capability mode.
+
+    - Looks up mode in CAPABILITY_PROMPTS (falls back to text_generation if unknown)
+    - system_prompt  → sent as system instruction to set AI persona
+    - user_message   → prefix + raw user input, sent as the human turn
+    """
     config = CAPABILITY_PROMPTS.get(mode, CAPABILITY_PROMPTS["text_generation"])
     system_prompt = config["system"]
     user_message = config["prefix"] + user_input

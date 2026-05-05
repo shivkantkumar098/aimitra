@@ -1,19 +1,91 @@
 import { useState, useRef } from "react";
 import { CAPABILITIES } from "../utils/capabilities";
 
-export default function ChatInput({ onSend, isLoading, activeMode }) {
+const MAX_FILE_SIZE = 150 * 1024; // 150 KB
+const MAX_FILES = 5;
+const ACCEPT_EXTS = ".txt,.py,.js,.jsx,.ts,.tsx,.json,.xml,.html,.htm,.css,.scss,.md,.csv,.log,.yaml,.yml,.java,.cs,.cpp,.c,.go,.rb,.php,.sh,.bash,.sql,.env,.conf,.toml,.ini,.feature,.robot";
+const TEXT_EXTS = new Set(ACCEPT_EXTS.split(",").map((e) => e.replace(".", "")));
+
+function fileIcon(name) {
+  const ext = name.split(".").pop().toLowerCase();
+  if (["py"].includes(ext)) return "🐍";
+  if (["js", "jsx", "ts", "tsx"].includes(ext)) return "⚛";
+  if (["json", "yaml", "yml", "toml"].includes(ext)) return "📋";
+  if (["html", "htm", "css", "scss"].includes(ext)) return "🌐";
+  if (["md"].includes(ext)) return "📝";
+  if (["csv", "log"].includes(ext)) return "📊";
+  if (["sql"].includes(ext)) return "🗄️";
+  if (["sh", "bash"].includes(ext)) return "💻";
+  if (["java", "cs", "cpp", "c", "go", "rb", "php"].includes(ext)) return "⚙️";
+  if (["feature", "robot"].includes(ext)) return "🧪";
+  return "📄";
+}
+
+function fmtSize(b) {
+  return b < 1024 ? b + "B" : (b / 1024).toFixed(1) + "KB";
+}
+
+export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode }) {
   const [text, setText] = useState("");
+  const [attachedFiles, setAttachedFiles] = useState([]);
+  const [fileError, setFileError] = useState(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
+
   const activeCapability = CAPABILITIES.find((c) => c.id === activeMode);
+
+  const handleFileSelect = (e) => {
+    setFileError(null);
+    const files = Array.from(e.target.files);
+    const errors = [];
+
+    files.forEach((file) => {
+      if (attachedFiles.length >= MAX_FILES) {
+        errors.push(`Max ${MAX_FILES} files allowed`);
+        return;
+      }
+      const ext = file.name.split(".").pop().toLowerCase();
+      if (!TEXT_EXTS.has(ext)) {
+        errors.push(`${file.name}: unsupported type`);
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`${file.name}: too large (max 150KB)`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setAttachedFiles((prev) => [
+          ...prev,
+          { name: file.name, content: ev.target.result, size: file.size, ext },
+        ]);
+      };
+      reader.readAsText(file, "UTF-8");
+    });
+
+    if (errors.length) setFileError(errors[0]);
+    e.target.value = "";
+  };
+
+  const removeFile = (idx) => setAttachedFiles((prev) => prev.filter((_, i) => i !== idx));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!text.trim() || isLoading) return;
-    onSend(text.trim());
-    setText("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+    if ((!text.trim() && attachedFiles.length === 0) || isLoading) return;
+
+    let msg = text.trim();
+    if (attachedFiles.length > 0) {
+      const block = attachedFiles
+        .map((f) => `\n\n--- File: ${f.name} ---\n\`\`\`${f.ext}\n${f.content}\n\`\`\``)
+        .join("");
+      msg = (msg || "Please analyze the attached file(s).") + block;
     }
+
+    onSend(msg);
+    setText("");
+    setAttachedFiles([]);
+    setFileError(null);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
   const handleKeyDown = (e) => {
@@ -27,37 +99,110 @@ export default function ChatInput({ onSend, isLoading, activeMode }) {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = "auto";
-    ta.style.height = Math.min(ta.scrollHeight, 200) + "px";
+    ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
     setText(e.target.value);
   };
 
+  const canSend = (text.trim() || attachedFiles.length > 0) && !isLoading;
+
   return (
-    <div className="border-t border-gray-800 bg-[#0d0d1a] px-4 py-4">
-      {activeCapability && (
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs text-gray-500">Mode:</span>
-          <span className="text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-600/30 px-2 py-0.5 rounded-full">
-            {activeCapability.icon} {activeCapability.label}
-          </span>
+    <div className="border-t border-gray-800/80 bg-[#0a0a15] px-4 pt-3 pb-4">
+      {/* Capability switcher pills */}
+      <div className="flex gap-1.5 overflow-x-auto pb-3 scrollbar-none">
+        {CAPABILITIES.map((cap) => (
+          <button
+            key={cap.id}
+            type="button"
+            onClick={() => setActiveMode(cap.id)}
+            title={cap.description}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+              activeMode === cap.id
+                ? "bg-violet-600/20 text-violet-300 border-violet-500/40 shadow-sm"
+                : "text-gray-500 border-gray-700/50 hover:text-gray-300 hover:border-gray-600"
+            }`}
+          >
+            <span className="text-sm leading-none">{cap.icon}</span>
+            <span className="whitespace-nowrap">{cap.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Attached files strip */}
+      {attachedFiles.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2.5">
+          {attachedFiles.map((f, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-1.5 bg-[#1a1f2e] border border-violet-600/30 px-2.5 py-1.5 rounded-lg text-xs"
+            >
+              <span className="text-base leading-none">{fileIcon(f.name)}</span>
+              <span className="text-gray-200 font-medium max-w-[120px] truncate">{f.name}</span>
+              <span className="text-gray-500">{fmtSize(f.size)}</span>
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
+                className="ml-0.5 text-gray-500 hover:text-red-400 transition-colors text-base leading-none"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       )}
-      <form onSubmit={handleSubmit} className="flex gap-3 items-end">
-        <div className="flex-1 bg-[#1f2937] border border-gray-700 rounded-xl focus-within:border-indigo-500 transition-colors">
+
+      {fileError && (
+        <p className="text-xs text-red-400 mb-2">⚠ {fileError}</p>
+      )}
+
+      {/* Text input + send */}
+      <form onSubmit={handleSubmit} className="flex gap-2.5 items-end">
+        <div
+          className={`flex-1 rounded-2xl border transition-colors overflow-hidden ${
+            attachedFiles.length > 0
+              ? "border-violet-600/40 bg-[#141921]"
+              : "border-gray-700/80 bg-[#141921] focus-within:border-violet-500/60"
+          }`}
+        >
           <textarea
             ref={textareaRef}
             value={text}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
-            placeholder={`${activeCapability ? activeCapability.description : "Type a message"}... (Enter to send, Shift+Enter for newline)`}
+            placeholder={
+              attachedFiles.length > 0
+                ? "Add instructions or send file(s) directly…"
+                : `${activeCapability?.description ?? "Type a message"}…`
+            }
             rows={1}
             disabled={isLoading}
-            className="w-full bg-transparent text-gray-200 text-sm px-4 py-3 resize-none focus:outline-none placeholder-gray-600 disabled:opacity-50"
+            className="w-full bg-transparent text-gray-200 text-sm px-4 pt-3 pb-1 resize-none focus:outline-none placeholder-gray-600 disabled:opacity-50 leading-relaxed"
           />
+          <div className="flex items-center px-3 pb-2 pt-0.5 gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={attachedFiles.length >= MAX_FILES || isLoading}
+              title="Attach a text/code file"
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-violet-400 disabled:opacity-30 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Attach file</span>
+              {attachedFiles.length > 0 && (
+                <span className="bg-violet-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold leading-none">
+                  {attachedFiles.length}
+                </span>
+              )}
+            </button>
+            <span className="ml-auto text-xs text-gray-700">⏎ send · ⇧⏎ newline</span>
+          </div>
         </div>
+
         <button
           type="submit"
-          disabled={!text.trim() || isLoading}
-          className="w-10 h-10 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
+          disabled={!canSend}
+          className={`w-11 h-11 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-800 disabled:border disabled:border-gray-700 disabled:cursor-not-allowed rounded-2xl flex items-center justify-center transition-all flex-shrink-0 shadow-md shadow-violet-900/30 ${canSend && !isLoading ? "animate-glow-pulse" : ""}`}
         >
           {isLoading ? (
             <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
@@ -71,9 +216,15 @@ export default function ChatInput({ onSend, isLoading, activeMode }) {
           )}
         </button>
       </form>
-      <p className="text-xs text-gray-600 text-center mt-2">
-        AI may produce errors. Verify important outputs.
-      </p>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={ACCEPT_EXTS}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
     </div>
   );
 }
