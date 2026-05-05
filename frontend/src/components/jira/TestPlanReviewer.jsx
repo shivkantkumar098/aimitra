@@ -1,23 +1,20 @@
-/**
- * TestPlanReviewer — AI reviews a test plan against best practices and the JIRA ticket.
- *
- * Input modes:
- *   1. Paste test plan only → AI reviews for completeness, coverage, structure
- *   2. Paste test plan + ticket description → AI reviews alignment with requirements
- *
- * Review covers: coverage gaps, missing test types, AC alignment, risk areas.
- */
-
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
+import { DEFAULT_TEST_PLAN_FORMAT } from "../../hooks/useJiraTemplates";
+import TemplatePrompt from "./TemplatePrompt";
+import TemplateBadge from "./TemplateBadge";
 
-export default function TestPlanReviewer({ config }) {
+export default function TestPlanReviewer({ config, template, onSaveTemplate }) {
+  const effectiveFormat = template || DEFAULT_TEST_PLAN_FORMAT;
+  const [templateConfirmed, setTemplateConfirmed] = useState(!!template);
   const [testPlan, setTestPlan] = useState("");
   const [ticketDescription, setTicketDescription] = useState("");
   const [includeTicket, setIncludeTicket] = useState(false);
   const { result, isLoading, error, query, clear } = useAiQuery(config);
+
+  const handleResetFormat = () => onSaveTemplate("testPlanFormat", "");
 
   const handleReview = async () => {
     if (!testPlan.trim()) return;
@@ -35,7 +32,8 @@ Your review must cover:
 7. **Entry/Exit Criteria** — Are they defined and realistic?
 8. **Improvements** — Specific, prioritized recommendations
 
-Format your response with clear sections, use tables where helpful, and be specific with examples.`;
+Structure your response following this exact format:
+${effectiveFormat}`;
 
     const userMessage = includeTicket && ticketDescription.trim()
       ? `Review this test plan against the JIRA ticket requirements:\n\n--- JIRA TICKET ---\n${ticketDescription}\n--- END TICKET ---\n\n--- TEST PLAN ---\n${testPlan}\n--- END TEST PLAN ---`
@@ -44,8 +42,27 @@ Format your response with clear sections, use tables where helpful, and be speci
     await query(systemPrompt, userMessage);
   };
 
+  if (!templateConfirmed) {
+    return (
+      <TemplatePrompt
+        question="What format should I use for the test plan review report?"
+        defaultTemplate={DEFAULT_TEST_PLAN_FORMAT}
+        onSave={(val) => { onSaveTemplate("testPlanFormat", val); setTemplateConfirmed(true); }}
+        onUseDefault={() => setTemplateConfirmed(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full gap-4">
+      <TemplateBadge
+        label="📐 Review Format"
+        effectiveTemplate={effectiveFormat}
+        customSaved={!!template}
+        onSave={(val) => onSaveTemplate("testPlanFormat", val)}
+        onReset={handleResetFormat}
+      />
+
       {/* Toggle: include ticket */}
       <div className="flex items-center gap-3 px-1">
         <button
@@ -87,9 +104,9 @@ Format your response with clear sections, use tables where helpful, and be speci
             disabled={isLoading || !testPlan.trim()}
             className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors flex items-center gap-2"
           >
-            {isLoading ? (
-              <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Reviewing...</>
-            ) : "🔍 Review Test Plan"}
+            {isLoading
+              ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Reviewing...</>
+              : "🔍 Review Test Plan"}
           </button>
           {result && <button onClick={clear} className="text-xs text-gray-500 hover:text-gray-300">Clear</button>}
         </div>
@@ -97,7 +114,6 @@ Format your response with clear sections, use tables where helpful, and be speci
 
       {error && <div className="bg-red-900/30 border border-red-700 rounded-xl px-4 py-3 text-red-300 text-sm">⚠ {error}</div>}
 
-      {/* Review Result */}
       {result && (
         <div className="flex-1 bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">

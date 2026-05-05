@@ -3,29 +3,15 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
 import { createTicket, fetchProjects } from "../../services/jiraService";
-
-const PLACEHOLDER_FORMAT = `Summary: [Brief description of the bug]
-Environment: [Dev/QA/Staging/Prod]
-Browser/OS:
-Build Version:
-
-Steps to Reproduce:
-1.
-2.
-3.
-
-Expected Result:
-
-Actual Result:
-
-Severity: [Critical/High/Medium/Low]
-Priority: [P1/P2/P3/P4]
-Attachments: [Screenshots/Logs]`;
+import { DEFAULT_BUG_FORMAT } from "../../hooks/useJiraTemplates";
+import TemplatePrompt from "./TemplatePrompt";
+import TemplateBadge from "./TemplateBadge";
 
 export default function BugCreator({ config, template, onSaveTemplate, getHeaders, jiraDomain }) {
+  const effectiveTemplate = template || DEFAULT_BUG_FORMAT;
+  // Show the AI template prompt on load if no custom template is saved yet
+  const [templateConfirmed, setTemplateConfirmed] = useState(!!template);
   const [bugDescription, setBugDescription] = useState("");
-  const [editingTemplate, setEditingTemplate] = useState(!template);
-  const [draftTemplate, setDraftTemplate] = useState(template || PLACEHOLDER_FORMAT);
   const [projectKey, setProjectKey] = useState("");
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
@@ -47,18 +33,14 @@ export default function BugCreator({ config, template, onSaveTemplate, getHeader
     }
   };
 
-  const handleSaveTemplate = () => {
-    if (!draftTemplate.trim()) return;
-    onSaveTemplate("bugFormat", draftTemplate.trim());
-    setEditingTemplate(false);
-  };
+  const handleResetTemplate = () => onSaveTemplate("bugFormat", "");
 
   const handleGenerate = async () => {
     if (!bugDescription.trim()) return;
     const systemPrompt = `You are a senior QA engineer. Create a detailed JIRA bug ticket using EXACTLY this format:
 
---- COMPANY BUG FORMAT ---
-${template}
+--- BUG FORMAT ---
+${effectiveTemplate}
 --- END FORMAT ---
 
 Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY the filled ticket, no extra text.`;
@@ -70,12 +52,9 @@ Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY
     if (!result || !projectKey) return;
     setCreating(true);
     setCreateError(null);
-
-    // Extract summary from first line of result
     const lines = result.trim().split("\n");
     const summaryLine = lines.find(l => l.toLowerCase().includes("summary:")) || lines[0];
     const summary = summaryLine.replace(/^summary:\s*/i, "").trim() || bugDescription.slice(0, 100);
-
     try {
       const ticket = await createTicket(
         { project_key: projectKey, issue_type: "Bug", summary, description: result, priority: "Medium" },
@@ -89,46 +68,46 @@ Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY
     }
   };
 
+  if (!templateConfirmed) {
+    return (
+      <TemplatePrompt
+        question="What bug report format should I use for your company?"
+        defaultTemplate={DEFAULT_BUG_FORMAT}
+        onSave={(val) => { onSaveTemplate("bugFormat", val); setTemplateConfirmed(true); }}
+        onUseDefault={() => setTemplateConfirmed(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full gap-4">
-      {/* Template */}
-      <div className="bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white">🏢 Company Bug Format</span>
-            {template && !editingTemplate && <span className="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 px-2 py-0.5 rounded-full">✓ Saved</span>}
-          </div>
-          <button onClick={() => setEditingTemplate(!editingTemplate)} className="text-xs text-violet-400 hover:text-violet-300">
-            {editingTemplate ? "Cancel" : "Edit"}
-          </button>
-        </div>
-        {editingTemplate ? (
-          <div className="p-4">
-            <p className="text-xs text-gray-400 mb-2">Paste your company's exact bug format. AI always uses this structure.</p>
-            <textarea value={draftTemplate} onChange={(e) => setDraftTemplate(e.target.value)} rows={9}
-              className="w-full bg-[#0d1117] text-gray-300 text-sm font-mono rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none" />
-            <button onClick={handleSaveTemplate} disabled={!draftTemplate.trim()}
-              className="mt-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 text-white text-sm rounded-lg transition-colors">
-              Save Format
-            </button>
-          </div>
-        ) : template ? (
-          <pre className="px-4 py-3 text-xs text-gray-400 font-mono whitespace-pre-wrap max-h-28 overflow-y-auto">{template}</pre>
-        ) : (
-          <div className="px-4 py-3 text-sm text-amber-400">⚠ No template saved. Click "Edit" to add your format.</div>
-        )}
-      </div>
+      <TemplateBadge
+        label="🏢 Bug Format"
+        effectiveTemplate={effectiveTemplate}
+        customSaved={!!template}
+        onSave={(val) => onSaveTemplate("bugFormat", val)}
+        onReset={handleResetTemplate}
+      />
 
       {/* Bug Description */}
       <div className="bg-[#1a1f2e] border border-gray-700 rounded-xl p-4">
         <label className="block text-sm font-semibold text-white mb-2">🐛 Describe the Bug</label>
-        <textarea value={bugDescription} onChange={(e) => setBugDescription(e.target.value)} rows={5}
+        <textarea
+          value={bugDescription}
+          onChange={(e) => setBugDescription(e.target.value)}
+          rows={5}
           className="w-full bg-[#0d1117] text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none placeholder-gray-600"
-          placeholder="Describe the bug. e.g. 'Login button doesn't respond on Chrome when password has special characters...'" />
+          placeholder="Describe the bug. e.g. 'Login button doesn't respond on Chrome when password has special characters...'"
+        />
         <div className="flex items-center gap-3 mt-3">
-          <button onClick={handleGenerate} disabled={isLoading || !bugDescription.trim() || !template}
-            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors flex items-center gap-2">
-            {isLoading ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Generating...</> : "✨ Generate Bug Ticket"}
+          <button
+            onClick={handleGenerate}
+            disabled={isLoading || !bugDescription.trim()}
+            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors flex items-center gap-2"
+          >
+            {isLoading
+              ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Generating...</>
+              : "✨ Generate Bug Ticket"}
           </button>
           {result && <button onClick={clear} className="text-xs text-gray-500 hover:text-gray-300">Clear</button>}
         </div>
@@ -145,8 +124,6 @@ Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY
           <div className="p-4 overflow-y-auto max-h-64 markdown-content text-sm">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
           </div>
-
-          {/* Create in JIRA */}
           <div className="px-4 pb-4 border-t border-gray-700 pt-3">
             <p className="text-xs font-semibold text-white mb-2">🚀 Create in JIRA</p>
             <div className="flex gap-2 items-center">
@@ -163,7 +140,9 @@ Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY
                   </select>
                   <button onClick={handleCreateInJira} disabled={creating || !projectKey}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2">
-                    {creating ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Creating...</> : "🔵 Create in JIRA"}
+                    {creating
+                      ? <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/></svg>Creating...</>
+                      : "🔵 Create in JIRA"}
                   </button>
                 </>
               )}
@@ -171,8 +150,7 @@ Rules: Follow field names exactly. Mark assumed info with [assumed]. Output ONLY
             {createdTicket && (
               <div className="mt-2 flex items-center gap-2 text-emerald-400 text-sm">
                 <span>✓ Created</span>
-                <a href={createdTicket.url} target="_blank" rel="noreferrer"
-                  className="font-semibold underline hover:text-emerald-300">{createdTicket.key} ↗</a>
+                <a href={createdTicket.url} target="_blank" rel="noreferrer" className="font-semibold underline hover:text-emerald-300">{createdTicket.key} ↗</a>
               </div>
             )}
             {createError && <p className="mt-2 text-red-400 text-xs">⚠ {createError}</p>}

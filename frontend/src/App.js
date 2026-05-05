@@ -99,7 +99,7 @@ export default function App() {
         </div>
       ) : (
         <div className="flex-1 overflow-hidden">
-          <JiraPanel config={effectiveConfig} />
+          <JiraPanel config={effectiveConfig} activeMode={activeMode} />
         </div>
       )}
     </div>

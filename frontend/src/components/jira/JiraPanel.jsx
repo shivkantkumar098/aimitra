@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import BugCreator from "./BugCreator";
 import TestPlanReviewer from "./TestPlanReviewer";
 import TicketValidator from "./TicketValidator";
@@ -20,8 +20,28 @@ const TABS = [
   { id: "comment", label: "Comment Generator",icon: "💬", desc: "Post-validation comments in your format" },
 ];
 
-export default function JiraPanel({ config }) {
+const SIDEBAR_MODE_MAP = {
+  jira_rovo:     "rovo",
+  jira_create:   "create",
+  jira_bug:      "bug",
+  jira_jql:      "jql",
+  jira_plan:     "plan",
+  jira_validate: "validate",
+  jira_comment:  "comment",
+};
+
+export default function JiraPanel({ config, activeMode }) {
   const [activeTab, setActiveTab] = useState("rovo");
+  const prevMode = useRef(activeMode);
+
+  // Sync sidebar clicks → JiraPanel tab
+  useEffect(() => {
+    if (activeMode !== prevMode.current) {
+      prevMode.current = activeMode;
+      const tab = SIDEBAR_MODE_MAP[activeMode];
+      if (tab) setActiveTab(tab);
+    }
+  }, [activeMode]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { templates, saveTemplate } = useJiraTemplates();
   const { jiraAuth, connect, disconnect, isConnecting, authError, getHeaders } = useJiraAuth();
@@ -91,8 +111,11 @@ export default function JiraPanel({ config }) {
           >
             <span>{tab.icon}</span>
             <span>{tab.label}</span>
-            {tab.id === "bug"     && templates.bugFormat     && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
-            {tab.id === "comment" && templates.commentFormat && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
+            {tab.id === "bug"      && templates.bugFormat      && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
+            {tab.id === "comment"  && templates.commentFormat  && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
+            {tab.id === "plan"     && templates.testPlanFormat && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
+            {tab.id === "validate" && templates.validatorFormat && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
+            {tab.id === "create"   && templates.ticketFormat   && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
             {tab.id === "rovo"    && <span className="text-xs bg-blue-600/30 text-blue-300 px-1.5 py-0.5 rounded-full font-medium">AI</span>}
           </button>
         ))}
@@ -107,6 +130,8 @@ export default function JiraPanel({ config }) {
           {activeTab === "create" && (
             <TicketCreator
               config={config}
+              template={templates.ticketFormat}
+              onSaveTemplate={saveTemplate}
               getHeaders={getHeaders}
               jiraDomain={jiraAuth.domain}
             />
@@ -129,12 +154,15 @@ export default function JiraPanel({ config }) {
           {activeTab === "plan" && (
             <TestPlanReviewer
               config={config}
-              getHeaders={getHeaders}
+              template={templates.testPlanFormat}
+              onSaveTemplate={saveTemplate}
             />
           )}
           {activeTab === "validate" && (
             <TicketValidator
               config={config}
+              template={templates.validatorFormat}
+              onSaveTemplate={saveTemplate}
               getHeaders={getHeaders}
             />
           )}

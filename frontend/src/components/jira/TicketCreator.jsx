@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
 import { fetchTicket, createTicket, fetchProjects } from "../../services/jiraService";
+import TemplatePrompt from "./TemplatePrompt";
+import TemplateBadge from "./TemplateBadge";
 
 const BUILT_IN_FORMATS = {
   story: `Summary: [User story title]
@@ -87,11 +89,11 @@ Child Stories (initial):
 - [ ]`,
 };
 
-export default function TicketCreator({ config, getHeaders, jiraDomain }) {
+export default function TicketCreator({ config, template, onSaveTemplate, getHeaders, jiraDomain }) {
+  const [templateConfirmed, setTemplateConfirmed] = useState(!!template);
   const [inputMode, setInputMode] = useState("template"); // "template" | "sample"
   const [ticketType, setTicketType] = useState("story");
-  const [customFormat, setCustomFormat] = useState("");
-  const [editingFormat, setEditingFormat] = useState(false);
+  const [customFormat, setCustomFormat] = useState(template || "");
   const [sampleTicketId, setSampleTicketId] = useState("");
   const [sampleContent, setSampleContent] = useState("");
   const [loadingSample, setLoadingSample] = useState(false);
@@ -202,6 +204,17 @@ Rules:
     }
   };
 
+  if (!templateConfirmed) {
+    return (
+      <TemplatePrompt
+        question="What ticket format should I use for your company?"
+        defaultTemplate={BUILT_IN_FORMATS.story}
+        onSave={(val) => { onSaveTemplate("ticketFormat", val); setCustomFormat(val); setTemplateConfirmed(true); }}
+        onUseDefault={() => setTemplateConfirmed(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* Mode toggle */}
@@ -230,58 +243,30 @@ Rules:
 
       {/* Template mode */}
       {inputMode === "template" && (
-        <div className="bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-            <span className="text-sm font-semibold text-white">🗂 Ticket Format</span>
-            {!editingFormat && (
-              <div className="flex gap-2">
-                {["story", "bug", "task", "epic"].map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTicketType(t)}
-                    className={`text-xs px-2 py-1 rounded-lg capitalize transition-colors ${
-                      ticketType === t && !customFormat
-                        ? "bg-blue-600/30 text-blue-300 border border-blue-600/40"
-                        : "text-gray-400 hover:text-gray-200 bg-gray-800"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
+        <div className="flex flex-col gap-2">
+          <TemplateBadge
+            label="🗂 Ticket Format"
+            effectiveTemplate={activeFormat}
+            customSaved={!!customFormat.trim()}
+            onSave={(val) => { onSaveTemplate("ticketFormat", val); setCustomFormat(val); }}
+            onReset={() => { onSaveTemplate("ticketFormat", ""); setCustomFormat(""); }}
+          />
+          {!customFormat.trim() && (
+            <div className="flex gap-1 px-1">
+              {["story", "bug", "task", "epic"].map((t) => (
                 <button
-                  onClick={() => setEditingFormat(true)}
-                  className="text-xs text-violet-400 hover:text-violet-300 px-2"
+                  key={t}
+                  onClick={() => setTicketType(t)}
+                  className={`text-xs px-3 py-1 rounded-lg capitalize transition-colors ${
+                    ticketType === t
+                      ? "bg-blue-600/30 text-blue-300 border border-blue-600/40"
+                      : "text-gray-400 hover:text-gray-200 bg-gray-800"
+                  }`}
                 >
-                  Custom
+                  {t}
                 </button>
-              </div>
-            )}
-            {editingFormat && (
-              <button
-                onClick={() => setEditingFormat(false)}
-                className="text-xs text-gray-400 hover:text-gray-200"
-              >
-                Done
-              </button>
-            )}
-          </div>
-          {editingFormat ? (
-            <div className="p-4">
-              <p className="text-xs text-gray-400 mb-2">
-                Paste your company's ticket format. AI will always follow this structure.
-              </p>
-              <textarea
-                value={customFormat}
-                onChange={(e) => setCustomFormat(e.target.value)}
-                rows={10}
-                placeholder="Paste your custom format here..."
-                className="w-full bg-[#0d1117] text-gray-300 text-sm font-mono rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-violet-500 resize-none"
-              />
+              ))}
             </div>
-          ) : (
-            <pre className="px-4 py-3 text-xs text-gray-400 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto">
-              {activeFormat}
-            </pre>
           )}
         </div>
       )}
