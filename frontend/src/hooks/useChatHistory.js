@@ -8,7 +8,7 @@
  * Title is auto-generated from the first user message (truncated to 60 chars).
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY = "qa_chat_history";
 const MAX_HISTORY = 60;
@@ -33,11 +33,18 @@ function load() {
 function persist(conversations) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+    window.dispatchEvent(new CustomEvent("qa_history_updated"));
   } catch { /* storage full */ }
 }
 
 export function useChatHistory() {
   const [history, setHistory] = useState(load);
+
+  useEffect(() => {
+    const handler = () => setHistory(load());
+    window.addEventListener("qa_history_updated", handler);
+    return () => window.removeEventListener("qa_history_updated", handler);
+  }, []);
 
   // Create a brand-new entry; returns the generated id
   const saveConversation = useCallback((messages, meta = {}) => {
@@ -112,7 +119,10 @@ export function useChatHistory() {
 
   const clearHistory = useCallback(() => {
     setHistory([]);
-    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      window.dispatchEvent(new CustomEvent("qa_history_updated"));
+    } catch { /* ignore */ }
   }, []);
 
   return { history, saveConversation, upsertConversation, deleteConversation, clearHistory };

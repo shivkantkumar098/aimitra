@@ -353,6 +353,56 @@ export default function Sidebar({
           </div>
         )}
 
+        {/* JIRA Tools (JIRA view) */}
+        {activeView === "jira" && (
+          <div className="px-4 py-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">JIRA Tools</p>
+            <div className="space-y-0.5">
+              {JIRA_TOOLS.map((tool, i) => (
+                <button
+                  key={tool.id}
+                  onClick={() => setActiveMode(tool.id)}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                  className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                    activeMode === tool.id
+                      ? "bg-blue-600/20 text-blue-300 border border-blue-600/40"
+                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                  }`}
+                >
+                  <span className="text-base w-5 text-center">{tool.icon}</span>
+                  <span className="text-left leading-tight">{tool.label}</span>
+                  {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-blue-400 rounded-full animate-fade-in" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Additional Tools (devtools view) */}
+        {activeView === "devtools" && (
+          <div className="px-4 py-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Additional Tools</p>
+            <div className="space-y-0.5">
+              {DEV_TOOLS.map((tool, i) => (
+                <button
+                  key={tool.id}
+                  onClick={() => setActiveMode(tool.id)}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                  className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                    activeMode === tool.id
+                      ? "bg-emerald-600/20 text-emerald-300 border border-emerald-600/40"
+                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                  }`}
+                >
+                  <span className="text-base w-5 text-center">{tool.icon}</span>
+                  <span className="text-left leading-tight">{tool.label}</span>
+                  {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-emerald-400 rounded-full animate-fade-in" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Activity History — visible in all views ── */}
         <div className="px-4 py-3 border-t border-gray-800/60">
           {/* Header */}
@@ -451,56 +501,6 @@ export default function Sidebar({
             )
           )}
         </div>
-
-        {/* JIRA Tools (JIRA view) */}
-        {activeView === "jira" && (
-          <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">JIRA Tools</p>
-            <div className="space-y-0.5">
-              {JIRA_TOOLS.map((tool, i) => (
-                <button
-                  key={tool.id}
-                  onClick={() => setActiveMode(tool.id)}
-                  style={{ animationDelay: `${i * 30}ms` }}
-                  className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    activeMode === tool.id
-                      ? "bg-blue-600/20 text-blue-300 border border-blue-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-                  }`}
-                >
-                  <span className="text-base w-5 text-center">{tool.icon}</span>
-                  <span className="text-left leading-tight">{tool.label}</span>
-                  {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-blue-400 rounded-full animate-fade-in" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Additional Tools (devtools view) */}
-        {activeView === "devtools" && (
-          <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Additional Tools</p>
-            <div className="space-y-0.5">
-              {DEV_TOOLS.map((tool, i) => (
-                <button
-                  key={tool.id}
-                  onClick={() => setActiveMode(tool.id)}
-                  style={{ animationDelay: `${i * 30}ms` }}
-                  className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    activeMode === tool.id
-                      ? "bg-emerald-600/20 text-emerald-300 border border-emerald-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-                  }`}
-                >
-                  <span className="text-base w-5 text-center">{tool.icon}</span>
-                  <span className="text-left leading-tight">{tool.label}</span>
-                  {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-emerald-400 rounded-full animate-fade-in" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
