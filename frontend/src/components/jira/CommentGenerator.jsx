@@ -17,7 +17,7 @@ export default function CommentGenerator({ config, template, onSaveTemplate, get
   const [posting, setPosting] = useState(false);
   const [postResult, setPostResult] = useState(null);
   const [postError, setPostError] = useState(null);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Comment Generator", mode: "jira_comment", view: "jira" });
 
   const handleTicketLoaded = (ticket) => setTicketId(ticket.key);
 

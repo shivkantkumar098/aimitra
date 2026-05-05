@@ -12,7 +12,7 @@ export default function TestPlanReviewer({ config, template, onSaveTemplate }) {
   const [testPlan, setTestPlan] = useState("");
   const [ticketDescription, setTicketDescription] = useState("");
   const [includeTicket, setIncludeTicket] = useState(false);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Test Plan Review", mode: "jira_plan", view: "jira" });
 
   const handleResetFormat = () => onSaveTemplate("testPlanFormat", "");
 

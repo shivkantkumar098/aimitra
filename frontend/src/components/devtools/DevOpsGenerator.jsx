@@ -18,7 +18,7 @@ const TOOLS = [
 export default function DevOpsGenerator({ config }) {
   const [tool, setTool] = useState("dockerfile");
   const [description, setDescription] = useState("");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "DevOps Generator", mode: "devops", view: "devtools" });
 
   const selected = TOOLS.find(t => t.id === tool);
 

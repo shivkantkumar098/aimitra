@@ -23,7 +23,7 @@ export default function JsonMockData({ config }) {
   const [input, setInput] = useState("");
   const [count, setCount] = useState(5);
   const [locale, setLocale] = useState("en-US");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "JSON & Mock Data", mode: "json", view: "devtools" });
 
   const handle = async (desc) => {
     const d = desc || input;

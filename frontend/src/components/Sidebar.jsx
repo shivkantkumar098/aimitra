@@ -57,15 +57,20 @@ const JIRA_TOOLS = [
 ];
 
 const DEV_TOOLS = [
-  { id: "explain",  icon: "🔍", label: "Code Explainer" },
-  { id: "review",   icon: "🕵️", label: "Code Review" },
-  { id: "debug",    icon: "🐛", label: "Debug & Fix" },
-  { id: "convert",  icon: "🔄", label: "Code Converter" },
-  { id: "regex",    icon: "📝", label: "Regex Builder" },
-  { id: "sql",      icon: "🗄️", label: "SQL Helper" },
-  { id: "git",      icon: "📦", label: "Git Assistant" },
-  { id: "devops",   icon: "🐳", label: "DevOps Generator" },
-  { id: "json",     icon: "🎲", label: "JSON & Mock Data" },
+  { id: "tool_helper",     icon: "🧭", label: "Tool Helper" },
+  { id: "explain",         icon: "🔍", label: "Code Explainer" },
+  { id: "review",          icon: "🕵️", label: "Code Review" },
+  { id: "debug",           icon: "🐛", label: "Debug & Fix" },
+  { id: "convert",         icon: "🔄", label: "Code Converter" },
+  { id: "regex",           icon: "📝", label: "Regex Builder" },
+  { id: "sql",             icon: "🗄️", label: "SQL Helper" },
+  { id: "git",             icon: "📦", label: "Git Assistant" },
+  { id: "devops",          icon: "🐳", label: "DevOps Generator" },
+  { id: "json",            icon: "🎲", label: "JSON & Mock Data" },
+  { id: "screenshot_test", icon: "📸", label: "Screenshot → Tests" },
+  { id: "bdd",             icon: "🥒", label: "BDD Generator" },
+  { id: "api_test",        icon: "🔌", label: "API Test Generator" },
+  { id: "a11y",            icon: "♿", label: "A11y Checker" },
 ];
 
 function ModelDropdown({ models, value, onChange }) {
@@ -121,6 +126,7 @@ export default function Sidebar({
   config, updateConfig, apiKey, setApiKey,
   activeMode, setActiveMode, activeView, setActiveView,
   onNewChat, history = [], onLoadConversation, onDeleteConversation, onClearHistory,
+  isOpen = false, onClose,
 }) {
   const [showKey, setShowKey] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(true);
@@ -134,9 +140,9 @@ export default function Sidebar({
   const activeModels = MODELS.filter((m) => m.provider === config.provider);
 
   return (
-    <aside className="w-72 min-w-[288px] h-screen bg-[#0f1117] border-r border-gray-800/80 flex flex-col overflow-hidden">
+    <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[#0f1117] border-r border-gray-800/80 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
       {/* Logo + New Chat */}
-      <div className="px-4 py-3 border-b border-gray-800/80 flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-gray-800/80 flex items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/30 flex-shrink-0 animate-glow-pulse">
             <span className="text-white text-base">⚡</span>
@@ -157,6 +163,16 @@ export default function Sidebar({
             <path d="M12 5v14M5 12h14" />
           </svg>
           New
+        </button>
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="md:hidden flex-shrink-0 p-1.5 text-gray-500 hover:text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+          title="Close"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
@@ -298,7 +314,7 @@ export default function Sidebar({
                 activeView === "devtools" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              ⚡ Dev Tools
+              ⚡ Additional Tools
             </button>
             <button
               onClick={() => setActiveView("jira")}
@@ -311,7 +327,7 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Capabilities (Chat view) */}
+        {/* Capabilities (Chat view only) */}
         {activeView === "chat" && (
           <div className="px-4 py-3 border-b border-gray-800/80">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Capabilities</p>
@@ -337,106 +353,104 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ── Chat History ── */}
-        {activeView === "chat" && (
-          <div className="px-4 py-3">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2">
-              <button
-                onClick={() => setHistoryOpen((o) => !o)}
-                className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 transition-colors"
+        {/* ── Activity History — visible in all views ── */}
+        <div className="px-4 py-3 border-t border-gray-800/60">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={() => setHistoryOpen((o) => !o)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 transition-colors"
+            >
+              <svg
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                className={`w-3 h-3 transition-transform ${historyOpen ? "rotate-90" : ""}`}
               >
-                <svg
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                  className={`w-3 h-3 transition-transform ${historyOpen ? "rotate-90" : ""}`}
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-                History
-                {history.length > 0 && (
-                  <span className="ml-1 bg-gray-700 text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-normal">
-                    {history.length}
-                  </span>
-                )}
-              </button>
-
-              {history.length > 0 && historyOpen && (
-                confirmClear ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-400">Sure?</span>
-                    <button
-                      onClick={() => { onClearHistory(); setConfirmClear(false); }}
-                      className="text-xs text-red-400 hover:text-red-300 px-1"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={() => setConfirmClear(false)}
-                      className="text-xs text-gray-500 hover:text-gray-300 px-1"
-                    >
-                      No
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setConfirmClear(true)}
-                    className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+              Activity
+              {history.length > 0 && (
+                <span className="ml-1 bg-gray-700 text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-normal">
+                  {history.length}
+                </span>
               )}
-            </div>
+            </button>
 
-            {/* List */}
-            {historyOpen && (
-              history.length === 0 ? (
-                <p className="text-xs text-gray-600 italic px-1 py-2">
-                  No history yet — start chatting!
-                </p>
-              ) : (
-                <div className="space-y-1">
-                  {history.map((conv, i) => (
-                    <div
-                      key={conv.id}
-                      style={{ animationDelay: `${i * 25}ms` }}
-                      className="animate-fade-up group flex items-start gap-2 rounded-lg hover:bg-gray-800/70 transition-colors cursor-pointer pr-1"
-                      onClick={() => onLoadConversation(conv)}
-                    >
-                      <div className="flex-1 min-w-0 px-3 py-2">
-                        <p className="text-xs text-gray-300 truncate leading-snug group-hover:text-white transition-colors">
-                          {conv.title}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          <span className="text-xs text-gray-600">
-                            {relativeTime(conv.timestamp)}
-                          </span>
-                          {conv.model && (
-                            <>
-                              <span className="text-gray-700">·</span>
-                              <span className="text-xs text-gray-600 truncate max-w-[90px]">
-                                {conv.model.split("/").pop().split("-").slice(0, 3).join("-")}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDeleteConversation(conv.id); }}
-                        className="flex-shrink-0 mt-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all p-1 rounded"
-                        title="Delete"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                          <path d="M18 6L6 18M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
+            {history.length > 0 && historyOpen && (
+              confirmClear ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-400">Sure?</span>
+                  <button
+                    onClick={() => { onClearHistory(); setConfirmClear(false); }}
+                    className="text-xs text-red-400 hover:text-red-300 px-1"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => setConfirmClear(false)}
+                    className="text-xs text-gray-500 hover:text-gray-300 px-1"
+                  >
+                    No
+                  </button>
                 </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmClear(true)}
+                  className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                >
+                  Clear all
+                </button>
               )
             )}
           </div>
-        )}
+
+          {/* List */}
+          {historyOpen && (
+            history.length === 0 ? (
+              <p className="text-xs text-gray-600 italic px-1 py-2">
+                No activity yet — start using any tool!
+              </p>
+            ) : (
+              <div className="space-y-1">
+                {history.map((conv, i) => (
+                  <div
+                    key={conv.id}
+                    style={{ animationDelay: `${i * 25}ms` }}
+                    className="animate-fade-up group flex items-start gap-2 rounded-lg hover:bg-gray-800/70 transition-colors cursor-pointer pr-1"
+                    onClick={() => onLoadConversation(conv)}
+                  >
+                    <div className="flex-1 min-w-0 px-3 py-2">
+                      <p className="text-xs text-gray-300 truncate leading-snug group-hover:text-white transition-colors">
+                        {conv.title}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className="text-xs text-gray-600">
+                          {relativeTime(conv.timestamp)}
+                        </span>
+                        {conv.model && (
+                          <>
+                            <span className="text-gray-700">·</span>
+                            <span className="text-xs text-gray-600 truncate max-w-[90px]">
+                              {conv.model.split("/").pop().split("-").slice(0, 3).join("-")}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onDeleteConversation(conv.id); }}
+                      className="flex-shrink-0 mt-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all p-1 rounded"
+                      title="Delete"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </div>
 
         {/* JIRA Tools (JIRA view) */}
         {activeView === "jira" && (
@@ -463,10 +477,10 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* Dev Tools (devtools view) */}
+        {/* Additional Tools (devtools view) */}
         {activeView === "devtools" && (
           <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Dev Tools</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Additional Tools</p>
             <div className="space-y-0.5">
               {DEV_TOOLS.map((tool, i) => (
                 <button

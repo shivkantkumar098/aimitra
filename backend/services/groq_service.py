@@ -47,6 +47,8 @@ async def generate_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> str:
     """
     Non-streaming Groq call.
@@ -87,6 +89,8 @@ async def stream_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> AsyncGenerator[str, None]:
     """
     Streaming Groq call.

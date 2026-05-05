@@ -106,7 +106,7 @@ export default function TicketCreator({ config, template, onSaveTemplate, getHea
   const [creating, setCreating] = useState(false);
   const [createdTicket, setCreatedTicket] = useState(null);
   const [createError, setCreateError] = useState(null);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Ticket Creator", mode: "jira_create", view: "jira" });
 
   const activeFormat =
     inputMode === "template"

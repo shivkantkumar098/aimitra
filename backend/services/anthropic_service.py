@@ -27,18 +27,32 @@ MAX_HISTORY = 6
 MAX_MSG_CHARS = 2000
 
 
-def _build_messages(user_message: str, history: list[dict] | None) -> list[dict]:
+def _build_messages(
+    user_message: str,
+    history: list[dict] | None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
+) -> list[dict]:
     """
     Builds Anthropic-format messages array (no system message — passed separately).
 
     Structure: [...history (last 6), user]
     Roles must strictly alternate user/assistant; history is assumed well-formed.
+    When image_base64 is provided, the user message uses a content array with
+    an image block followed by a text block (Anthropic vision format).
     """
     messages = []
     if history:
         for msg in history[-MAX_HISTORY:]:
             messages.append({"role": msg["role"], "content": msg["content"][:MAX_MSG_CHARS]})
-    messages.append({"role": "user", "content": user_message})
+    if image_base64:
+        content = [
+            {"type": "image", "source": {"type": "base64", "media_type": image_mime_type, "data": image_base64}},
+            {"type": "text", "text": user_message},
+        ]
+    else:
+        content = user_message
+    messages.append({"role": "user", "content": content})
     return messages
 
 
@@ -49,6 +63,8 @@ async def generate_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> str:
     """
     Non-streaming Anthropic call.
@@ -66,7 +82,7 @@ async def generate_response(
         "max_tokens": 4096,
         "temperature": temperature,
         "system": system_prompt,
-        "messages": _build_messages(user_message, history),
+        "messages": _build_messages(user_message, history, image_base64, image_mime_type),
     }
 
     data = None
@@ -94,6 +110,8 @@ async def stream_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> AsyncGenerator[str, None]:
     """
     Streaming Anthropic call.
@@ -112,7 +130,7 @@ async def stream_response(
         "max_tokens": 4096,
         "temperature": temperature,
         "system": system_prompt,
-        "messages": _build_messages(user_message, history),
+        "messages": _build_messages(user_message, history, image_base64, image_mime_type),
         "stream": True,
     }
 

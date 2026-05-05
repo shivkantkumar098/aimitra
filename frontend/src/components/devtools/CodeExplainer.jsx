@@ -9,7 +9,7 @@ export default function CodeExplainer({ config }) {
   const [code, setCode] = useState("");
   const [lang, setLang] = useState("Auto-detect");
   const [depth, setDepth] = useState("detailed"); // "simple" | "detailed" | "expert"
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Code Explainer", mode: "explain", view: "devtools" });
 
   const system = `You are a senior software engineer and expert code educator. Explain code clearly and accurately.
 Depth levels:

@@ -46,7 +46,12 @@ class OpenAICompatProvider:
         }
 
     def _build_messages(
-        self, system_prompt: str, user_message: str, history: list[dict] | None
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: list[dict] | None,
+        image_base64: str | None = None,
+        image_mime_type: str = "image/png",
     ) -> list[dict]:
         messages = [{"role": "system", "content": system_prompt}]
         if history:
@@ -54,7 +59,14 @@ class OpenAICompatProvider:
                 messages.append(
                     {"role": msg["role"], "content": msg["content"][:MAX_MSG_CHARS]}
                 )
-        messages.append({"role": "user", "content": user_message})
+        if image_base64:
+            user_content = [
+                {"type": "image_url", "image_url": {"url": f"data:{image_mime_type};base64,{image_base64}"}},
+                {"type": "text", "text": user_message},
+            ]
+        else:
+            user_content = user_message
+        messages.append({"role": "user", "content": user_content})
         return messages
 
     async def generate_response(
@@ -65,10 +77,12 @@ class OpenAICompatProvider:
         user_message: str,
         temperature: float = 0.7,
         history: list[dict] | None = None,
+        image_base64: str | None = None,
+        image_mime_type: str = "image/png",
     ) -> str:
         body = {
             "model": model,
-            "messages": self._build_messages(system_prompt, user_message, history),
+            "messages": self._build_messages(system_prompt, user_message, history, image_base64, image_mime_type),
             "temperature": temperature,
             "max_tokens": 4096,
             "stream": False,
@@ -99,10 +113,12 @@ class OpenAICompatProvider:
         user_message: str,
         temperature: float = 0.7,
         history: list[dict] | None = None,
+        image_base64: str | None = None,
+        image_mime_type: str = "image/png",
     ) -> AsyncGenerator[str, None]:
         body = {
             "model": model,
-            "messages": self._build_messages(system_prompt, user_message, history),
+            "messages": self._build_messages(system_prompt, user_message, history, image_base64, image_mime_type),
             "temperature": temperature,
             "max_tokens": 4096,
             "stream": True,

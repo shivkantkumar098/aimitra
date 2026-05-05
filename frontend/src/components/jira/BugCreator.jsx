@@ -18,7 +18,7 @@ export default function BugCreator({ config, template, onSaveTemplate, getHeader
   const [creating, setCreating] = useState(false);
   const [createdTicket, setCreatedTicket] = useState(null);
   const [createError, setCreateError] = useState(null);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Bug Creator", mode: "jira_bug", view: "jira" });
 
   const loadProjects = async () => {
     setLoadingProjects(true);

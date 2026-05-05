@@ -30,7 +30,7 @@ const SIDEBAR_MODE_MAP = {
   jira_comment:  "comment",
 };
 
-export default function JiraPanel({ config, activeMode }) {
+export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
   const [activeTab, setActiveTab] = useState("rovo");
   const prevMode = useRef(activeMode);
 
@@ -54,9 +54,17 @@ export default function JiraPanel({ config, activeMode }) {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="px-6 py-4 border-b border-gray-800 bg-[#0d0d1a] flex-shrink-0">
+      <header className="px-4 md:px-6 py-4 border-b border-gray-800 bg-[#0d0d1a] flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button
+              onClick={onToggleSidebar}
+              className="md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
+              </svg>
+            </button>
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold text-white">J</div>
             <div>
               <h2 className="text-sm font-semibold text-white">JIRA Tools</h2>

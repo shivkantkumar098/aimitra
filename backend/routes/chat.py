@@ -17,6 +17,7 @@ To add a new provider:
 
 import json
 import re
+from typing import Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -152,6 +153,8 @@ class ChatRequest(BaseModel):
     temperature: float = Field(default=0.7, ge=0.0, le=1.0)
     streaming: bool = True
     history: list[Message] = []
+    image_base64: Optional[str] = None
+    image_mime_type: Optional[str] = "image/png"
 
 
 @router.post("")
@@ -181,6 +184,8 @@ async def chat(req: ChatRequest):
             user_message=user_message,
             temperature=req.temperature,
             history=history,
+            image_base64=req.image_base64,
+            image_mime_type=req.image_mime_type,
         )
         return {"response": text, "mode": req.mode}
     except Exception as e:
@@ -224,6 +229,8 @@ async def chat_stream(req: ChatRequest):
                 user_message=user_message,
                 temperature=req.temperature,
                 history=history,
+                image_base64=req.image_base64,
+                image_mime_type=req.image_mime_type,
             ):
                 yield f"data: {json.dumps({'chunk': chunk})}\n\n"
             yield "data: [DONE]\n\n"

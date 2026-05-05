@@ -19,7 +19,7 @@ export default function RegexBuilder({ config }) {
   const [testString, setTestString] = useState("");
   const [flavor, setFlavor] = useState("JavaScript");
   const [extractedRegex, setExtractedRegex] = useState("");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Regex Builder", mode: "regex", view: "devtools" });
 
   const handle = async (desc) => {
     const d = desc || description;

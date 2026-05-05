@@ -13,7 +13,8 @@ import { useState, useCallback } from "react";
 const STORAGE_KEY = "qa_chat_history";
 const MAX_HISTORY = 60;
 
-function makeTitle(messages) {
+function makeTitle(messages, titleOverride) {
+  if (titleOverride) return titleOverride;
   const first = messages.find((m) => m.role === "user");
   if (!first) return "Untitled Chat";
   const text = first.content.trim();
@@ -44,7 +45,7 @@ export function useChatHistory() {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const entry = {
       id,
-      title: makeTitle(messages),
+      title: makeTitle(messages, meta.title),
       timestamp: new Date().toISOString(),
       messages,
       mode: meta.mode || "text_generation",

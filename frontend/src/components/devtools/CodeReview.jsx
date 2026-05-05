@@ -17,7 +17,7 @@ export default function CodeReview({ config }) {
   const [code, setCode] = useState("");
   const [lang, setLang] = useState("Auto-detect");
   const [focus, setFocus] = useState(["bugs", "security", "performance"]);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Code Review", mode: "review", view: "devtools" });
 
   const toggleFocus = (id) =>
     setFocus(f => f.includes(id) ? f.filter(x => x !== id) : [...f, id]);

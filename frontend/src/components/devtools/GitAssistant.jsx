@@ -17,7 +17,7 @@ export default function GitAssistant({ config }) {
   const [commitType, setCommitType] = useState("feat");
   const [scope, setScope] = useState("");
   const [techStack, setTechStack] = useState("");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Git Assistant", mode: "git", view: "devtools" });
 
   const handle = async () => {
     if (mode !== "gitignore" && !diff.trim()) return;

@@ -28,6 +28,8 @@ def _build_request_body(
     user_message: str,
     temperature: float,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> dict:
     """
     Builds the Gemini-specific request body.
@@ -35,6 +37,7 @@ def _build_request_body(
     Gemini uses 'contents' array (not 'messages') with role 'model' (not 'assistant').
     system_instruction is a separate top-level field, not a message role.
     History items are mapped: assistant → model to match Gemini's expected format.
+    When image_base64 is provided, it is sent as inlineData alongside the text part.
     """
     contents = []
 
@@ -44,8 +47,11 @@ def _build_request_body(
             role = "user" if msg["role"] == "user" else "model"
             contents.append({"role": role, "parts": [{"text": msg["content"]}]})
 
-    # Current user message appended last
-    contents.append({"role": "user", "parts": [{"text": user_message}]})
+    # Current user message — include image inline data when provided
+    parts = [{"text": user_message}]
+    if image_base64:
+        parts.insert(0, {"inlineData": {"mimeType": image_mime_type, "data": image_base64}})
+    contents.append({"role": "user", "parts": parts})
 
     return {
         "system_instruction": {"parts": [{"text": system_prompt}]},
@@ -65,6 +71,8 @@ async def generate_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> str:
     """
     Non-streaming Gemini call.
@@ -73,7 +81,7 @@ async def generate_response(
     Extracts text from candidates[0].content.parts[0].text in the response.
     """
     url = f"{GEMINI_BASE_URL}/{model}:generateContent?key={api_key}"
-    body = _build_request_body(system_prompt, user_message, temperature, history)
+    body = _build_request_body(system_prompt, user_message, temperature, history, image_base64, image_mime_type)
 
     for attempt in range(3):
         async with httpx.AsyncClient(timeout=60.0) as client:
@@ -100,6 +108,8 @@ async def stream_response(
     user_message: str,
     temperature: float = 0.7,
     history: list[dict] | None = None,
+    image_base64: str | None = None,
+    image_mime_type: str = "image/png",
 ) -> AsyncGenerator[str, None]:
     """
     Streaming Gemini call using Server-Sent Events (alt=sse).
@@ -109,7 +119,7 @@ async def stream_response(
     Parses candidates[0].content.parts[0].text from each SSE chunk.
     """
     url = f"{GEMINI_BASE_URL}/{model}:streamGenerateContent?key={api_key}&alt=sse"
-    body = _build_request_body(system_prompt, user_message, temperature, history)
+    body = _build_request_body(system_prompt, user_message, temperature, history, image_base64, image_mime_type)
 
     backoff = [15, 30, 60]  # seconds to wait per retry attempt
     for attempt in range(3):

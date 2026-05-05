@@ -17,7 +17,7 @@ export default function JqlSearch({ config, getHeaders }) {
   const [jqlIssues, setJqlIssues] = useState(null);
   const [searchError, setSearchError] = useState(null);
   const [searching, setSearching] = useState(false);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "JQL Search", mode: "jira_jql", view: "jira" });
 
   const SYSTEM = `You are a Jira Query Language (JQL) expert. Convert natural language requests into precise, optimized JQL queries.
 

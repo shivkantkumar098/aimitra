@@ -26,7 +26,7 @@ export default function TicketValidator({ config, template, onSaveTemplate, getH
   const [posting, setPosting] = useState(false);
   const [postResult, setPostResult] = useState(null);
   const [postError, setPostError] = useState(null);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Ticket Validator", mode: "jira_validate", view: "jira" });
 
   const toggleCheck = (id) =>
     setSelectedChecks((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);

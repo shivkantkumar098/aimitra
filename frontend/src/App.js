@@ -11,6 +11,7 @@ export default function App() {
   const { config, updateConfig, apiKey, setApiKey } = useConfig();
   const [activeMode, setActiveMode] = useState("text_generation");
   const [activeView, setActiveView] = useState("chat"); // "chat" | "jira" | "devtools"
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const effectiveConfig = { ...config, apiKey };
 
@@ -48,7 +49,7 @@ export default function App() {
     setActiveView(view);
     if (view === "jira") setActiveMode("jira_bug");
     if (view === "chat") setActiveMode("text_generation");
-    if (view === "devtools") setActiveMode("explain");
+    if (view === "devtools") setActiveMode("tool_helper");
   };
 
   // Start a fresh conversation — reset the id so the next save creates a new entry
@@ -67,6 +68,14 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#0d0d1a]">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar
         config={config}
         updateConfig={updateConfig}
@@ -81,6 +90,8 @@ export default function App() {
         onLoadConversation={handleLoadConversation}
         onDeleteConversation={deleteConversation}
         onClearHistory={clearHistory}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {activeView === "chat" ? (
@@ -92,14 +103,24 @@ export default function App() {
           activeMode={activeMode}
           setActiveMode={setActiveMode}
           onNewChat={handleNewChat}
+          onToggleSidebar={() => setSidebarOpen((o) => !o)}
         />
       ) : activeView === "devtools" ? (
-        <div className="flex-1 overflow-hidden">
-          <DevPanel config={effectiveConfig} activeMode={activeMode} setActiveMode={setActiveMode} />
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <DevPanel
+            config={effectiveConfig}
+            activeMode={activeMode}
+            setActiveMode={setActiveMode}
+            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+          />
         </div>
       ) : (
-        <div className="flex-1 overflow-hidden">
-          <JiraPanel config={effectiveConfig} activeMode={activeMode} />
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <JiraPanel
+            config={effectiveConfig}
+            activeMode={activeMode}
+            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+          />
         </div>
       )}
     </div>

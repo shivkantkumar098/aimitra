@@ -16,7 +16,7 @@ export default function SqlHelper({ config }) {
   const [input, setInput] = useState("");
   const [schema, setSchema] = useState("");
   const [dialect, setDialect] = useState("PostgreSQL");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "SQL Helper", mode: "sql", view: "devtools" });
 
   const placeholders = {
     generate: "e.g. Get the top 10 customers by total order value in the last 30 days, including their email and number of orders",

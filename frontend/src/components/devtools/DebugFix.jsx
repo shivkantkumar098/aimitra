@@ -9,7 +9,7 @@ export default function DebugFix({ config }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [code, setCode] = useState("");
   const [lang, setLang] = useState("Auto-detect");
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Debug & Fix", mode: "debug", view: "devtools" });
 
   const handle = async () => {
     if (!errorMsg.trim() && !code.trim()) return;

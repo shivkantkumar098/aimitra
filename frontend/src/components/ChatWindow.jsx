@@ -13,6 +13,7 @@ export default function ChatWindow({
   activeMode,
   setActiveMode,
   onNewChat,
+  onToggleSidebar,
 }) {
   const bottomRef = useRef(null);
   const activeCapability = CAPABILITIES.find((c) => c.id === activeMode);
@@ -24,8 +25,17 @@ export default function ChatWindow({
   return (
     <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0a0a15]">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3.5 border-b border-gray-800/80 bg-[#0d0d1a] flex-shrink-0">
+      <header className="flex items-center justify-between px-4 md:px-6 py-3.5 border-b border-gray-800/80 bg-[#0d0d1a] flex-shrink-0">
         <div className="flex items-center gap-3">
+          {/* Mobile hamburger */}
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+              <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
+            </svg>
+          </button>
           <div>
             <h2 className="text-sm font-semibold text-white">
               {activeCapability ? (

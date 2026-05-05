@@ -10,7 +10,7 @@ export default function CodeConverter({ config }) {
   const [fromLang, setFromLang] = useState("Python");
   const [toLang, setToLang] = useState("JavaScript");
   const [keepComments, setKeepComments] = useState(true);
-  const { result, isLoading, error, query, clear } = useAiQuery(config);
+  const { result, isLoading, error, query, clear } = useAiQuery(config, { label: "Code Converter", mode: "convert", view: "devtools" });
 
   const swap = () => { setFromLang(toLang); setToLang(fromLang); };
 
