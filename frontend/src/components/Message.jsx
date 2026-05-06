@@ -116,14 +116,12 @@ export default function Message({ message }) {
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse animate-msg-right" : "animate-msg-left"}`}>
       {/* Avatar */}
-      <div
-        className={`w-8 h-8 rounded-2xl flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm ${
-          isUser
-            ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white"
-            : "bg-[#1a1f2e] border border-gray-700 text-base"
-        }`}
-      >
-        {isUser ? "U" : "⚡"}
+      <div className="w-8 h-8 rounded-2xl flex-shrink-0 shadow-sm overflow-hidden">
+        {isUser ? (
+          <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-xs font-bold text-white">U</div>
+        ) : (
+          <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
+        )}
       </div>
 
       {/* Bubble */}
