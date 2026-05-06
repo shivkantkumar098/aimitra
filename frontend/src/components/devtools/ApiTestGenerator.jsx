@@ -1,7 +1,6 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
+import ResultPanel from "../shared/ResultPanel";
 
 const OUTPUT_FORMATS = [
   { id: "pytest",    label: "pytest + requests",    desc: "Python test suite" },
@@ -139,23 +138,7 @@ Include:
       {error && (
         <div className="bg-red-900/30 border border-red-700 rounded-xl px-4 py-3 text-red-300 text-sm">⚠ {error}</div>
       )}
-
-      {result && (
-        <div className="bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-            <span className="text-sm font-semibold text-white">🧪 Generated API Tests</span>
-            <button
-              onClick={() => navigator.clipboard.writeText(result)}
-              className="text-xs px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg"
-            >
-              Copy
-            </button>
-          </div>
-          <div className="p-4 markdown-content text-sm max-h-[600px] overflow-y-auto">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
-          </div>
-        </div>
-      )}
+      <ResultPanel result={result} title="🔌 API Tests" titleColor="text-white" toolName="api-test-generator" onClear={clear} maxHeight="600px" />
     </div>
   );
 }

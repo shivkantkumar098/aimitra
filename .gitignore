@@ -106,3 +106,9 @@ codemie.config.local.js
 .cache/
 tmp/
 temp/
+
+# ========================
+# Generated documentation
+# ========================
+AiMitra_Documentation.pdf
+AiMitra_Documentation.docx

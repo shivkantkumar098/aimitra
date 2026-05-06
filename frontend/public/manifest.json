@@ -1,0 +1,15 @@
+{
+  "short_name": "AiMitra",
+  "name": "AiMitra — AI Assistant for QA & Dev",
+  "description": "AI-powered platform for QA Engineers, Business Analysts & Developers",
+  "icons": [
+    { "src": "logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0d0d1a",
+  "background_color": "#0d0d1a",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "developer", "utilities"]
+}

@@ -71,6 +71,7 @@ const BA_TOOLS = [
 
 const DEV_TOOLS = [
   { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★" },
+  { id: "model_compare",   icon: "⚡", label: "Model Compare ★" },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper" },
   { id: "explain",         icon: "🔍", label: "Code Explainer" },
   { id: "review",          icon: "🕵️", label: "Code Review" },

@@ -218,7 +218,14 @@ export default function Message({ message, setActiveMode, setActiveView }) {
             </div>
           )}
         </div>
-        <span className="text-xs text-gray-600 px-1">{time}</span>
+        <div className="flex items-center gap-2 px-1">
+          {time && <span className="text-xs text-gray-600">{time}</span>}
+          {!isUser && message.content && (
+            <span className="text-xs text-gray-700" title="Estimated token count">
+              ~{Math.round(message.content.length / 4).toLocaleString()} tokens
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

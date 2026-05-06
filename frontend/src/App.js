@@ -15,6 +15,25 @@ export default function App() {
   const [activeView, setActiveView] = useState("chat"); // "chat" | "jira" | "devtools" | "ba"
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e) => {
+      const ctrl = e.ctrlKey || e.metaKey;
+      if (!ctrl) return;
+      switch (e.key) {
+        case "k": e.preventDefault(); handleNewChat(); break;
+        case "/": e.preventDefault(); setSidebarOpen(o => !o); break;
+        case "1": e.preventDefault(); handleSetView("chat"); break;
+        case "2": e.preventDefault(); handleSetView("devtools"); break;
+        case "3": e.preventDefault(); handleSetView("jira"); break;
+        case "4": e.preventDefault(); handleSetView("ba"); break;
+        default: break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const effectiveConfig = { ...config, apiKey };
 
   const { messages, isLoading, error, send, newChat, loadMessages } = useChat(effectiveConfig);

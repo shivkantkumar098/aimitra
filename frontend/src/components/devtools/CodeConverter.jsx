@@ -1,7 +1,7 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
+import ResultPanel from "../shared/ResultPanel";
+import FileDrop from "../shared/FileDrop";
 
 const LANGUAGES = ["JavaScript","TypeScript","Python","Java","C#","C++","C","Go","Rust","Ruby","PHP","Swift","Kotlin","Dart","Scala","R","MATLAB","Shell/Bash","PowerShell","SQL"];
 
@@ -62,6 +62,7 @@ export default function CodeConverter({ config }) {
         <textarea value={code} onChange={e => setCode(e.target.value)} rows={12}
           placeholder={`# Paste your ${fromLang} code here...`}
           className="w-full bg-[#0d1117] text-gray-200 text-sm font-mono px-4 py-3 focus:outline-none resize-none placeholder-gray-600" />
+        <div className="px-4 pb-3"><FileDrop onLoad={(c) => setCode(c)} label="Or drop a source code file here" /></div>
       </div>
 
       <div className="flex gap-3">
@@ -73,19 +74,7 @@ export default function CodeConverter({ config }) {
       </div>
 
       {error && <div className="bg-red-900/30 border border-red-700 rounded-xl px-4 py-3 text-red-300 text-sm">⚠ {error}</div>}
-
-      {result && (
-        <div className="bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
-            <span className="text-sm font-semibold text-white">✅ Converted {toLang} Code</span>
-            <button onClick={() => navigator.clipboard.writeText(result)}
-              className="text-xs px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg">Copy</button>
-          </div>
-          <div className="p-4 markdown-content text-sm max-h-[600px] overflow-y-auto">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
-          </div>
-        </div>
-      )}
+      <ResultPanel result={result} title="✅ Converted Code" titleColor="text-white" toolName="code-converter" onClear={clear} maxHeight="600px" />
     </div>
   );
 }
