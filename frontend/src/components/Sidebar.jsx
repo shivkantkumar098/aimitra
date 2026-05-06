@@ -57,6 +57,8 @@ const JIRA_TOOLS = [
 ];
 
 const DEV_TOOLS = [
+  { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★" },
+  { id: "web_test_gen",    icon: "🌐", label: "Web Test Generator" },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper" },
   { id: "explain",         icon: "🔍", label: "Code Explainer" },
   { id: "review",          icon: "🕵️", label: "Code Review" },
@@ -144,8 +146,8 @@ export default function Sidebar({
       {/* Logo + New Chat */}
       <div className="px-4 py-3 border-b border-gray-800/80 flex items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/30 flex-shrink-0 animate-glow-pulse">
-            <span className="text-white text-base">⚡</span>
+          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-lg shadow-violet-900/30 animate-glow-pulse">
+            <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-white tracking-tight">

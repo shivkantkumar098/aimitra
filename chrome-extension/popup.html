@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AiMitra Test Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="logo">
+    <img src="logo.png" alt="AiMitra" class="logo-icon" style="width:32px;height:32px;object-fit:cover;border-radius:8px;" />
+    <div>
+      <div class="logo-name">Ai<span>Mitra</span></div>
+      <div class="logo-sub">Test Code Generator</div>
+    </div>
+  </div>
+  <div class="star-badge">★ Star Feature</div>
+</header>
+
+<!-- ── Page info ── -->
+<div class="page-bar">
+  <div class="page-bar-url" id="pageUrl">Loading…</div>
+  <div class="page-bar-title" id="pageTitle"></div>
+</div>
+
+<!-- ── Tabs ── -->
+<nav class="tabs">
+  <button class="tab active" data-tab="generate">⚡ Generate</button>
+  <button class="tab" data-tab="inspect">🔍 Inspector</button>
+  <button class="tab" data-tab="settings">⚙ Settings</button>
+</nav>
+
+<!-- ══ GENERATE TAB ═════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-generate">
+
+  <!-- Framework -->
+  <div>
+    <span class="label">Framework</span>
+    <div class="opt-group" data-key="framework">
+      <button class="opt active" data-value="playwright">Playwright</button>
+      <button class="opt" data-value="selenium">Selenium</button>
+      <button class="opt" data-value="cypress">Cypress</button>
+      <button class="opt" data-value="webdriverio">WebdriverIO</button>
+    </div>
+  </div>
+
+  <!-- Pattern -->
+  <div>
+    <span class="label">Pattern</span>
+    <div class="opt-group" data-key="pattern">
+      <button class="opt active" data-value="pom">POM</button>
+      <button class="opt" data-value="bdd">BDD / Gherkin</button>
+      <button class="opt" data-value="simple">Simple</button>
+    </div>
+  </div>
+
+  <!-- Language -->
+  <div>
+    <span class="label">Language</span>
+    <div class="opt-group" data-key="language">
+      <button class="opt active" data-value="python">Python</button>
+      <button class="opt" data-value="javascript">JavaScript</button>
+      <button class="opt" data-value="typescript">TypeScript</button>
+      <button class="opt" data-value="java">Java</button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box hidden" id="genError"></div>
+
+  <!-- Generate button -->
+  <button class="btn-primary" id="generateBtn">⚡ Generate Test Code</button>
+
+  <!-- Result -->
+  <div class="result-area hidden" id="resultArea">
+    <div class="result-header">
+      <span class="label" style="margin:0">Generated Code</span>
+      <div class="result-actions">
+        <button class="btn-sm" id="copyBtn">📋 Copy</button>
+        <button class="btn-sm" id="downloadBtn">💾 Download</button>
+      </div>
+    </div>
+    <pre class="code-block" id="codeOutput"></pre>
+  </div>
+</div>
+
+<!-- ══ INSPECTOR TAB ════════════════════════════════════════════════════════ -->
+<div class="tab-panel hidden" id="tab-inspect">
+
+  <!-- Page summary -->
+  <div>
+    <span class="label">Page Elements Found</span>
+    <div class="summary-grid" id="summaryGrid">
+      <div class="summary-card"><span class="num">—</span><span class="lbl">Forms</span></div>
+      <div class="summary-card"><span class="num">—</span><span class="lbl">Buttons</span></div>
+      <div class="summary-card"><span class="num">—</span><span class="lbl">Inputs</span></div>
+      <div class="summary-card"><span class="num">—</span><span class="lbl">Links</span></div>
+    </div>
+  </div>
+
+  <!-- Picked elements -->
+  <div>
+    <span class="label">Picked Elements <span id="pickedCount" style="color:#7c3aed">0</span></span>
+    <div class="picked-list" id="pickedList">
+      <p class="muted">Click "Pick Elements" then click any element on the page.</p>
+    </div>
+    <div class="btn-row" style="margin-top:6px">
+      <button class="btn-sec" id="pickBtn">🎯 Pick Elements</button>
+      <button class="btn-sec" id="clearBtn">🗑 Clear All</button>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:#4b5563;text-align:center;margin-top:-4px">
+    Picked elements become the focus of generated tests
+  </p>
+</div>
+
+<!-- ══ SETTINGS TAB ══════════════════════════════════════════════════════════ -->
+<div class="tab-panel hidden" id="tab-settings">
+
+  <div class="field">
+    <span class="label">AI Provider</span>
+    <select id="providerSelect">
+      <optgroup label="── Free Tier Available ──">
+        <option value="gemini">Google Gemini (gemini-2.0-flash)</option>
+        <option value="groq">Groq — Llama 3.3 70B (Free)</option>
+        <option value="openrouter">OpenRouter — Free models</option>
+        <option value="cerebras">Cerebras — Llama 3.3 70B (Fast)</option>
+      </optgroup>
+      <optgroup label="── Paid Providers ──">
+        <option value="openai">OpenAI (GPT-4o-mini)</option>
+        <option value="anthropic">Anthropic (Claude Haiku 4.5)</option>
+        <option value="mistral">Mistral AI (mistral-small)</option>
+        <option value="deepseek">DeepSeek (deepseek-chat)</option>
+        <option value="xai">xAI Grok (grok-3-mini)</option>
+        <option value="together">Together AI (Llama 3.3 70B)</option>
+        <option value="perplexity">Perplexity (sonar)</option>
+        <option value="fireworks">Fireworks AI (Llama 3.3 70B)</option>
+        <option value="cohere">Cohere (command-r)</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="field">
+    <span class="label">API Key</span>
+    <div class="key-wrap">
+      <input type="password" id="apiKeyInput" placeholder="Paste your API key here…" />
+      <button id="toggleKeyBtn">👁️</button>
+    </div>
+    <span class="hint" id="keyHint"></span>
+  </div>
+
+  <button class="btn-primary" id="saveBtn">Save Settings</button>
+  <span class="save-ok hidden" id="saveOk">✓ Settings saved!</span>
+
+  <div class="info-box">
+    <strong style="color:#a78bfa">🔑 Get your API key:</strong>
+    <ul>
+      <li><strong>Gemini</strong> — free at <code>aistudio.google.com/api-keys</code></li>
+      <li><strong>Groq</strong> — free at <code>console.groq.com/keys</code></li>
+      <li><strong>OpenRouter</strong> — free models at <code>openrouter.ai/keys</code></li>
+      <li><strong>Cerebras</strong> — free at <code>cloud.cerebras.ai</code></li>
+      <li><strong>OpenAI</strong> — <code>platform.openai.com/api-keys</code></li>
+      <li><strong>Anthropic</strong> — <code>console.anthropic.com</code></li>
+      <li><strong>Mistral</strong> — <code>console.mistral.ai</code></li>
+      <li><strong>DeepSeek</strong> — <code>platform.deepseek.com</code></li>
+      <li><strong>xAI</strong> — <code>console.x.ai</code></li>
+      <li><strong>Together</strong> — <code>api.together.ai</code></li>
+      <li><strong>Perplexity</strong> — <code>perplexity.ai/settings/api</code></li>
+      <li><strong>Fireworks</strong> — <code>fireworks.ai/account/api-keys</code></li>
+      <li><strong>Cohere</strong> — <code>dashboard.cohere.com/api-keys</code></li>
+    </ul>
+    <p style="margin-top:6px;font-size:11px;color:#4b5563">Keys are stored locally in your browser and never sent anywhere except the chosen AI provider.</p>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

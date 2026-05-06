@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "AiMitra Test Generator",
+  "short_name": "AiMitra",
+  "version": "1.0.0",
+  "description": "Generate POM, BDD & automation test code from any webpage using AI",
+  "permissions": ["activeTab", "storage", "tabs"],
+  "icons": {
+    "16":  "logo.png",
+    "48":  "logo.png",
+    "128": "logo.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AiMitra Test Generator",
+    "default_icon": {
+      "16":  "logo.png",
+      "48":  "logo.png",
+      "128": "logo.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
