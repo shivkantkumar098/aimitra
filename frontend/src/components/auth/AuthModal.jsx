@@ -89,8 +89,8 @@ export default function AuthModal({ onLogin, onSignup, isLoading, error, onClear
       <div className="w-full max-w-md bg-[#0f1117] border border-gray-800 rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="px-8 pt-8 pb-6 text-center border-b border-gray-800/60">
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-violet-900/40 mx-auto mb-4">
-            <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg shadow-violet-900/40 mx-auto mb-4 ring-2 ring-violet-500/30">
+            <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" style={{ objectPosition: "18% 45%" }} />
           </div>
           <h1 className="text-xl font-bold text-white">
             Ai<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Mitra</span>

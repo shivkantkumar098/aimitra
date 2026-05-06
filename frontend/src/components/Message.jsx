@@ -105,7 +105,75 @@ function AttachedFileChip({ name, preview }) {
   );
 }
 
-export default function Message({ message }) {
+function SuggestionCard({ suggestion, setActiveMode, setActiveView }) {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+
+  const isModelSuggestion = suggestion.type === "model";
+
+  const handleSwitch = () => {
+    if (!isModelSuggestion) {
+      if (setActiveView) setActiveView(suggestion.view);
+      if (setActiveMode) setActiveMode(suggestion.mode);
+    }
+  };
+
+  return (
+    <div className="flex animate-msg-left">
+      <div className={`max-w-[82%] rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex flex-col gap-2 border ${
+        isModelSuggestion
+          ? "bg-amber-950/30 border-amber-500/30"
+          : "bg-violet-950/40 border-violet-500/30"
+      }`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base">{isModelSuggestion ? "🤖" : "💡"}</span>
+            <p className={`text-sm font-semibold ${isModelSuggestion ? "text-amber-200" : "text-violet-200"}`}>
+              {isModelSuggestion ? "Better model for this" : "Better tool available"}
+            </p>
+          </div>
+          <button
+            onClick={() => setDismissed(true)}
+            className="text-gray-600 hover:text-gray-400 text-sm leading-none flex-shrink-0 mt-0.5"
+          >✕</button>
+        </div>
+
+        <p className="text-xs text-gray-400 leading-relaxed">
+          {isModelSuggestion ? (
+            <>Try <span className="font-medium text-amber-300">{suggestion.icon} {suggestion.label}</span> for this — {suggestion.hint}</>
+          ) : (
+            <><span className={`font-medium ${suggestion.view === "devtools" ? "text-emerald-300" : "text-violet-300"}`}>{suggestion.icon} {suggestion.label}</span> is designed exactly for this.{suggestion.hint ? ` ${suggestion.hint}` : " Switch to get more accurate, structured results."}</>
+          )}
+        </p>
+
+        {!isModelSuggestion && (
+          <button
+            onClick={handleSwitch}
+            className={`self-start flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-semibold rounded-lg transition-colors ${
+              suggestion.view === "devtools"
+                ? "bg-emerald-700 hover:bg-emerald-600"
+                : "bg-violet-600 hover:bg-violet-500"
+            }`}
+          >
+            Open {suggestion.label} →
+          </button>
+        )}
+
+        {isModelSuggestion && (
+          <p className="text-xs text-amber-400/70">
+            Switch provider in the sidebar → Settings → Provider / Model
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function Message({ message, setActiveMode, setActiveView }) {
+  if (message.role === "suggestion") {
+    return <SuggestionCard suggestion={message.suggestion} setActiveMode={setActiveMode} setActiveView={setActiveView} />;
+  }
+
   const isUser = message.role === "user";
   const time = message.timestamp
     ? new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -120,7 +188,7 @@ export default function Message({ message }) {
         {isUser ? (
           <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-xs font-bold text-white">U</div>
         ) : (
-          <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
+          <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" style={{ objectPosition: "18% 45%" }} />
         )}
       </div>
 

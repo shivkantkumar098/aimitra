@@ -56,9 +56,21 @@ const JIRA_TOOLS = [
   { id: "jira_comment",  icon: "💬", label: "Comment Generator" },
 ];
 
+const BA_TOOLS = [
+  { id: "ba_user_story",   icon: "📖", label: "User Story Generator" },
+  { id: "ba_acceptance",   icon: "✅", label: "Acceptance Criteria" },
+  { id: "ba_use_case",     icon: "🎭", label: "Use Case Generator" },
+  { id: "ba_requirements", icon: "🔎", label: "Requirements Analyzer" },
+  { id: "ba_process_flow", icon: "🔄", label: "Process Flow Generator" },
+  { id: "ba_brd",          icon: "📄", label: "BRD Generator" },
+  { id: "ba_gap",          icon: "📊", label: "Gap Analysis" },
+  { id: "ba_stakeholder",  icon: "📧", label: "Stakeholder Update" },
+  { id: "ba_meeting",      icon: "📝", label: "Meeting Summarizer" },
+  { id: "ba_impact",       icon: "💥", label: "Impact Analysis" },
+];
+
 const DEV_TOOLS = [
   { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★" },
-  { id: "web_test_gen",    icon: "🌐", label: "Web Test Generator" },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper" },
   { id: "explain",         icon: "🔍", label: "Code Explainer" },
   { id: "review",          icon: "🕵️", label: "Code Review" },
@@ -69,7 +81,6 @@ const DEV_TOOLS = [
   { id: "git",             icon: "📦", label: "Git Assistant" },
   { id: "devops",          icon: "🐳", label: "DevOps Generator" },
   { id: "json",            icon: "🎲", label: "JSON & Mock Data" },
-  { id: "screenshot_test", icon: "📸", label: "Screenshot → Tests" },
   { id: "bdd",             icon: "🥒", label: "BDD Generator" },
   { id: "api_test",        icon: "🔌", label: "API Test Generator" },
   { id: "a11y",            icon: "♿", label: "A11y Checker" },
@@ -146,8 +157,8 @@ export default function Sidebar({
       {/* Logo + New Chat */}
       <div className="px-4 py-3 border-b border-gray-800/80 flex items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-lg shadow-violet-900/30 animate-glow-pulse">
-            <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
+          <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-md shadow-violet-900/30 animate-glow-pulse ring-1 ring-violet-500/30">
+            <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" style={{ objectPosition: "18% 45%" }} />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-white tracking-tight">
@@ -301,10 +312,10 @@ export default function Sidebar({
 
         {/* View Toggle */}
         <div className="px-4 pt-4 pb-2">
-          <div className="flex rounded-lg bg-gray-800/60 p-0.5 gap-0.5">
+          <div className="grid grid-cols-2 gap-0.5 rounded-lg bg-gray-800/60 p-0.5">
             <button
               onClick={() => setActiveView("chat")}
-              className={`flex-1 py-1.5 text-xs rounded-md transition-all font-medium ${
+              className={`py-1.5 text-xs rounded-md transition-all font-medium ${
                 activeView === "chat" ? "bg-violet-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
               }`}
             >
@@ -312,19 +323,27 @@ export default function Sidebar({
             </button>
             <button
               onClick={() => setActiveView("devtools")}
-              className={`flex-1 py-1.5 text-xs rounded-md transition-all font-medium ${
+              className={`py-1.5 text-xs rounded-md transition-all font-medium ${
                 activeView === "devtools" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              ⚡ Additional Tools
+              ⚡ More Tools
             </button>
             <button
               onClick={() => setActiveView("jira")}
-              className={`flex-1 py-1.5 text-xs rounded-md transition-all font-medium ${
+              className={`py-1.5 text-xs rounded-md transition-all font-medium ${
                 activeView === "jira" ? "bg-blue-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
               }`}
             >
               🔵 JIRA
+            </button>
+            <button
+              onClick={() => setActiveView("ba")}
+              className={`py-1.5 text-xs rounded-md transition-all font-medium ${
+                activeView === "ba" ? "bg-amber-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              📋 BA Tools
             </button>
           </div>
         </div>
@@ -383,7 +402,7 @@ export default function Sidebar({
         {/* Additional Tools (devtools view) */}
         {activeView === "devtools" && (
           <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Additional Tools</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">More Tools</p>
             <div className="space-y-0.5">
               {DEV_TOOLS.map((tool, i) => (
                 <button
@@ -399,6 +418,31 @@ export default function Sidebar({
                   <span className="text-base w-5 text-center">{tool.icon}</span>
                   <span className="text-left leading-tight">{tool.label}</span>
                   {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-emerald-400 rounded-full animate-fade-in" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* BA Tools (ba view) */}
+        {activeView === "ba" && (
+          <div className="px-4 py-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">BA Tools</p>
+            <div className="space-y-0.5">
+              {BA_TOOLS.map((tool, i) => (
+                <button
+                  key={tool.id}
+                  onClick={() => setActiveMode(tool.id)}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                  className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                    activeMode === tool.id
+                      ? "bg-amber-600/20 text-amber-300 border border-amber-600/40"
+                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                  }`}
+                >
+                  <span className="text-base w-5 text-center">{tool.icon}</span>
+                  <span className="text-left leading-tight">{tool.label}</span>
+                  {activeMode === tool.id && <span className="ml-auto w-1.5 h-1.5 bg-amber-400 rounded-full animate-fade-in" />}
                 </button>
               ))}
             </div>

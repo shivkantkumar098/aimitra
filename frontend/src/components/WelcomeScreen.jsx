@@ -7,14 +7,14 @@ export default function WelcomeScreen({ activeMode, setActiveMode, onExampleClic
     <div className="flex flex-col items-center justify-center min-h-full px-4 py-10">
       {/* Hero */}
       <div className="relative mb-8 text-center animate-fade-up" style={{ animationDelay: "0ms" }}>
-        <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-4 shadow-xl shadow-violet-900/40 animate-glow-pulse">
-          <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" />
+        <div className="w-24 h-24 rounded-3xl overflow-hidden mx-auto mb-4 shadow-xl shadow-violet-900/40 animate-glow-pulse ring-2 ring-violet-500/30">
+          <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" style={{ objectPosition: "18% 45%" }} />
         </div>
         <h2 className="text-3xl font-bold text-white tracking-tight mb-2">
           Ai<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Mitra</span>
         </h2>
         <p className="text-gray-400 text-sm max-w-sm mx-auto leading-relaxed">
-          Smarter testing. Faster delivery. Built for QA engineers who love quality.
+          Your intelligent AI assistant. Empowering QA, BA & Dev teams to build better software, faster.
         </p>
       </div>
 

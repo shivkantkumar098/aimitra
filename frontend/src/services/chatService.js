@@ -20,7 +20,7 @@ const API_BASE = process.env.REACT_APP_API_URL ?? "http://localhost:8000";
  * Returns { response: string, mode: string }
  */
 export async function sendMessage(payload) {
-  const { message, mode, api_key, apiKey, model, provider, temperature, streaming, history } = payload;
+  const { message, mode, api_key, apiKey, model, provider, temperature, streaming, history, image_base64, image_mime_type } = payload;
   const res = await axios.post(`${API_BASE}/api/chat`, {
     message,
     mode,
@@ -30,6 +30,8 @@ export async function sendMessage(payload) {
     temperature,
     streaming,
     history: history || [],
+    image_base64: image_base64 ?? null,
+    image_mime_type: image_mime_type ?? "image/png",
   });
   return res.data;
 }
@@ -47,7 +49,7 @@ export async function sendMessage(payload) {
  * Uses a buffer to handle partial SSE lines split across multiple read() calls.
  */
 export async function sendMessageStream(payload, onChunk, onError) {
-  const { message, mode, api_key, apiKey, model, provider, temperature, history } = payload;
+  const { message, mode, api_key, apiKey, model, provider, temperature, history, image_base64, image_mime_type } = payload;
 
   const body = JSON.stringify({
     message,
@@ -58,6 +60,8 @@ export async function sendMessageStream(payload, onChunk, onError) {
     temperature,
     streaming: true,
     history: history || [],
+    image_base64: image_base64 ?? null,
+    image_mime_type: image_mime_type ?? "image/png",
   });
 
   // Initial fetch — connection errors handled separately from stream errors

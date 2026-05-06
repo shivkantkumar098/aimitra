@@ -12,6 +12,7 @@ export default function ChatWindow({
   onSend,
   activeMode,
   setActiveMode,
+  setActiveView,
   onNewChat,
   onToggleSidebar,
 }) {
@@ -74,7 +75,7 @@ export default function ChatWindow({
         ) : (
           <div className="max-w-3xl mx-auto space-y-5">
             {messages.map((msg) => (
-              <Message key={msg.id} message={msg} />
+              <Message key={msg.id} message={msg} setActiveMode={setActiveMode} setActiveView={setActiveView} />
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <TypingIndicator />

@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from routes.analyzer import router as analyzer_router
 from routes.chat import router as chat_router
+from routes.download import router as download_router
 from routes.health import router as health_router
 from routes.jira_api import router as jira_router
 
@@ -29,6 +31,8 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(analyzer_router)
+app.include_router(download_router)
 app.include_router(chat_router)
 app.include_router(jira_router)
 
@@ -47,4 +51,4 @@ if os.path.exists(_STATIC):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

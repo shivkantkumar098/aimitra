@@ -25,7 +25,7 @@ Your job is to guide users to the right tool for their task. Here is the complet
 - **Code Debugging** — Analyze and fix bugs by pasting code into chat
 - **Web Search** — Research technical topics and get up-to-date documentation
 
-## ⚡ ADDITIONAL TOOLS tab
+## ⚡ MORE TOOLS tab
 
 ### Code Tools
 - **Code Explainer** — Paste code to get a plain-English explanation of what it does
@@ -78,7 +78,7 @@ export default function ToolHelper({ config }) {
       <div className="bg-gradient-to-r from-violet-900/30 to-fuchsia-900/20 border border-violet-700/40 rounded-xl px-4 py-3">
         <p className="text-sm text-violet-200 font-medium mb-1">🧭 Not sure which tool to use?</p>
         <p className="text-xs text-gray-400">
-          Describe what you're trying to do and I'll point you to the right tool — whether it's in Chat, Additional Tools, or Jira.
+          Describe what you're trying to do and I'll point you to the right tool — whether it's in Chat, More Tools, or Jira.
         </p>
       </div>
 

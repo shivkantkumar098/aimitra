@@ -37,7 +37,7 @@ export function useChat(config) {
   });
 
   const send = useCallback(
-    async (text, mode) => {
+    async (text, mode, suggestion = null) => {
       if (!text.trim() || isLoading) return;
 
       // Guard: API key must be set before sending
@@ -48,7 +48,10 @@ export function useChat(config) {
 
       setError(null);
       const userMsg = addMessage("user", text);
-      setMessages((prev) => [...prev, userMsg]);
+      const toAdd = suggestion
+        ? [userMsg, { ...addMessage("suggestion", ""), suggestion }]
+        : [userMsg];
+      setMessages((prev) => [...prev, ...toAdd]);
       setIsLoading(true);
 
       // Only send last 6 messages, truncated to 2000 chars each, to avoid 413 errors
@@ -118,6 +121,10 @@ export function useChat(config) {
     [messages, isLoading, config]
   );
 
+  const injectMessage = useCallback((role, content, meta = {}) => {
+    setMessages(prev => [...prev, { ...addMessage(role, content), ...meta }]);
+  }, []);
+
   /** Clears all messages and resets loading/error state. */
   const newChat = useCallback(() => {
     setMessages([]);
@@ -138,5 +145,5 @@ export function useChat(config) {
     setIsLoading(false);
   }, []);
 
-  return { messages, isLoading, error, send, newChat, loadMessages };
+  return { messages, isLoading, error, send, newChat, loadMessages, injectMessage };
 }

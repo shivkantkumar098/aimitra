@@ -8,13 +8,14 @@ import SqlHelper from "./SqlHelper";
 import GitAssistant from "./GitAssistant";
 import DevOpsGenerator from "./DevOpsGenerator";
 import JsonMockData from "./JsonMockData";
-import ScreenshotTestGen from "./ScreenshotTestGen";
 import BddGenerator from "./BddGenerator";
 import ApiTestGenerator from "./ApiTestGenerator";
 import A11yChecker from "./A11yChecker";
 import ToolHelper from "./ToolHelper";
+import ChromeExtension from "./ChromeExtension";
 
 const TOOLS = [
+  { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★",   component: ChromeExtension },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper",          component: ToolHelper },
   { id: "explain",         icon: "🔍", label: "Code Explainer",      component: CodeExplainer },
   { id: "review",          icon: "🕵️", label: "Code Review",         component: CodeReview },
@@ -25,7 +26,6 @@ const TOOLS = [
   { id: "git",             icon: "📦", label: "Git Assistant",        component: GitAssistant },
   { id: "devops",          icon: "🐳", label: "DevOps Generator",     component: DevOpsGenerator },
   { id: "json",            icon: "🎲", label: "JSON & Mock Data",     component: JsonMockData },
-  { id: "screenshot_test", icon: "📸", label: "Screenshot → Tests",  component: ScreenshotTestGen },
   { id: "bdd",             icon: "🥒", label: "BDD Generator",        component: BddGenerator },
   { id: "api_test",        icon: "🔌", label: "API Test Generator",   component: ApiTestGenerator },
   { id: "a11y",            icon: "♿", label: "A11y Checker",          component: A11yChecker },
@@ -52,7 +52,7 @@ export default function DevPanel({ config, activeMode, setActiveMode, onToggleSi
           <span className="text-2xl animate-scale-in">{activeTool.icon}</span>
           <div>
             <h2 className="text-base font-bold text-white">{activeTool.label}</h2>
-            <p className="text-xs text-gray-500">AI-powered additional tool</p>
+            <p className="text-xs text-gray-500">AI-powered tools</p>
           </div>
         </div>
 
