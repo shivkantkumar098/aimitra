@@ -17,7 +17,9 @@ BUCKET = "issue-screenshots"
 
 def _supabase():
     url = os.getenv("SUPABASE_URL", "").strip()
-    key = os.getenv("SUPABASE_ANON_KEY", "").strip()
+    # Use service role key for storage uploads (bypasses RLS); fall back to anon key
+    key = os.getenv("SUPABASE_SERVICE_KEY", "") or os.getenv("SUPABASE_ANON_KEY", "")
+    key = key.strip()
     if not url or not key:
         return None
     from supabase import create_client
