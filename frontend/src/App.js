@@ -15,6 +15,10 @@ export default function App() {
   const [activeView, setActiveView] = useState("chat"); // "chat" | "jira" | "devtools" | "ba"
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = config.theme || "dark";
+  }, [config.theme]);
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
@@ -112,7 +116,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#0d0d1a]">
+    <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg-base)]">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div

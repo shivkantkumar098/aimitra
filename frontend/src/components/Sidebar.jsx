@@ -89,6 +89,13 @@ const DEV_TOOLS = [
   { id: "a11y",            icon: "♿", label: "A11y Checker" },
 ];
 
+const THEMES = [
+  { id: "dark",     label: "Dark",     swatch: ["#7c3aed", "#0d0d1a"] },
+  { id: "midnight", label: "Midnight", swatch: ["#0891b2", "#010d1a"] },
+  { id: "forest",   label: "Forest",   swatch: ["#059669", "#030f07"] },
+  { id: "light",    label: "Light",    swatch: ["#7c3aed", "#f8fafc"] },
+];
+
 function ModelDropdown({ models, value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -104,23 +111,23 @@ function ModelDropdown({ models, value, onChange }) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 bg-[#1f2937] text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 hover:border-violet-500/50 focus:outline-none focus:border-violet-500 transition-colors"
+        className="w-full flex items-center gap-2 bg-[var(--bg-input)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2 border border-[var(--border-primary)] hover:border-violet-500/50 focus:outline-none focus:border-violet-500 transition-colors"
       >
         {selected && <ModelIcon logoProvider={selected.logoProvider} size={16} />}
         <span className="flex-1 text-left truncate">{selected?.name || "Select model"}</span>
-        <svg className={`w-3.5 h-3.5 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg className={`w-3.5 h-3.5 text-[var(--text-faint)] transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M6 9l6 6 6-6"/>
         </svg>
       </button>
 
       {open && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1a1f2e] border border-gray-700 rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-[var(--bg-elevated)] border border-[var(--border-primary)] rounded-xl shadow-xl overflow-hidden">
           {models.map((m) => (
             <button
               key={m.id}
               onClick={() => { onChange(m.id); setOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left transition-colors hover:bg-violet-600/10 ${
-                m.id === value ? "bg-violet-600/20 text-violet-300" : "text-gray-300"
+                m.id === value ? "bg-violet-600/20 text-violet-300" : "text-[var(--text-secondary)]"
               }`}
             >
               <ModelIcon logoProvider={m.logoProvider} size={16} />
@@ -157,18 +164,18 @@ export default function Sidebar({
   const activeModels = MODELS.filter((m) => m.provider === config.provider);
 
   return (
-    <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[#0f1117] border-r border-gray-800/80 flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+    <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[var(--bg-sidebar)] border-r border-[var(--border-subtle)] flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
       {/* Logo + New Chat */}
-      <div className="px-4 py-3 border-b border-gray-800/80 flex items-center gap-2 flex-shrink-0">
+      <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-md shadow-violet-900/30 animate-glow-pulse ring-1 ring-violet-500/30">
             <img src="/logo.png" alt="AiMitra" className="w-full h-full object-cover" style={{ objectPosition: "18% 45%" }} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-bold text-white tracking-tight">
+            <h1 className="text-sm font-bold text-[var(--text-heading)] tracking-tight">
               Ai<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">Mitra</span>
             </h1>
-            <p className="text-xs text-gray-500">by Shiv Kant Kumar</p>
+            <p className="text-xs text-[var(--text-faint)]">by Shiv Kant Kumar</p>
           </div>
         </div>
         <button
@@ -184,7 +191,7 @@ export default function Sidebar({
         {/* Mobile close button */}
         <button
           onClick={onClose}
-          className="md:hidden flex-shrink-0 p-1.5 text-gray-500 hover:text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+          className="md:hidden flex-shrink-0 p-1.5 text-[var(--text-faint)] hover:text-[var(--text-secondary)] rounded-lg hover:bg-[var(--bg-ui)] transition-colors"
           title="Close"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
@@ -195,8 +202,8 @@ export default function Sidebar({
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {/* Configuration */}
-        <div className="px-4 py-4 border-b border-gray-800/80">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Configuration</p>
+        <div className="px-4 py-4 border-b border-[var(--border-subtle)]">
+          <p className="text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider mb-3">Configuration</p>
 
           {/* Saved keys indicator */}
           {savedProviders.length > 0 && (
@@ -212,7 +219,7 @@ export default function Sidebar({
                   className={`cursor-pointer text-xs px-2 py-0.5 rounded-full border transition-all ${
                     config.provider === p
                       ? "bg-violet-600/30 border-violet-500/60 text-violet-300"
-                      : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600"
+                      : "bg-[var(--bg-ui)] border-[var(--border-primary)] text-[var(--text-muted)] hover:border-[var(--border-medium)]"
                   }`}
                 >
                   ✓ {p.toUpperCase()}
@@ -223,14 +230,14 @@ export default function Sidebar({
 
           {/* Provider */}
           <div className="mb-3">
-            <label className="block text-xs text-gray-400 mb-1">Provider</label>
+            <label className="block text-xs text-[var(--text-muted)] mb-1">Provider</label>
             <select
               value={config.provider}
               onChange={(e) => {
                 const first = MODELS.find((m) => m.provider === e.target.value);
                 updateConfig({ provider: e.target.value, model: first?.id || "" });
               }}
-              className="w-full bg-[#1f2937] text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-[var(--bg-input)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2 border border-[var(--border-primary)] focus:outline-none focus:border-violet-500 transition-colors"
             >
               {Object.entries(PROVIDER_LABELS).map(([val, label]) => (
                 <option key={val} value={val}>{label}</option>
@@ -240,7 +247,7 @@ export default function Sidebar({
 
           {/* Model — custom dropdown with icons */}
           <div className="mb-3">
-            <label className="block text-xs text-gray-400 mb-1">Model</label>
+            <label className="block text-xs text-[var(--text-muted)] mb-1">Model</label>
             <ModelDropdown
               models={activeModels}
               value={config.model}
@@ -261,7 +268,7 @@ export default function Sidebar({
           {/* API Key */}
           <div className="mb-3">
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-400">
+              <label className="text-xs text-[var(--text-muted)]">
                 API Key
                 {apiKey && <span className="ml-1 text-emerald-400">✓ saved</span>}
               </label>
@@ -272,11 +279,11 @@ export default function Sidebar({
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder={`Enter ${config.provider.toUpperCase()} key...`}
-                className="w-full bg-[#1f2937] text-gray-200 text-sm rounded-lg px-3 py-2 pr-9 border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-600 transition-colors"
+                className="w-full bg-[var(--bg-input)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2 pr-9 border border-[var(--border-primary)] focus:outline-none focus:border-violet-500 placeholder-[var(--text-ghost)] transition-colors"
               />
               <button
                 onClick={() => setShowKey(!showKey)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-xs"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-faint)] hover:text-[var(--text-secondary)] text-xs"
               >
                 {showKey ? "🙈" : "👁️"}
               </button>
@@ -288,7 +295,7 @@ export default function Sidebar({
 
           {/* Temperature */}
           <div className="mb-3">
-            <label className="block text-xs text-gray-400 mb-1">
+            <label className="block text-xs text-[var(--text-muted)] mb-1">
               Temperature: <span className="text-violet-400 font-medium">{config.temperature.toFixed(1)}</span>
             </label>
             <input
@@ -297,30 +304,59 @@ export default function Sidebar({
               onChange={(e) => updateConfig({ temperature: parseFloat(e.target.value) })}
               className="w-full accent-violet-500"
             />
-            <div className="flex justify-between text-xs text-gray-600 mt-0.5">
+            <div className="flex justify-between text-xs text-[var(--text-ghost)] mt-0.5">
               <span>Precise</span><span>Creative</span>
             </div>
           </div>
 
           {/* Streaming */}
-          <div className="flex items-center justify-between">
-            <label className="text-xs text-gray-400">Streaming</label>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-xs text-[var(--text-muted)]">Streaming</label>
             <button
               onClick={() => updateConfig({ streaming: !config.streaming })}
-              className={`relative w-10 h-5 rounded-full transition-colors ${config.streaming ? "bg-violet-600" : "bg-gray-700"}`}
+              className={`relative w-10 h-5 rounded-full transition-colors ${config.streaming ? "bg-violet-600" : "bg-[var(--bg-ui)]"}`}
             >
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${config.streaming ? "translate-x-5" : "translate-x-0.5"}`} />
             </button>
+          </div>
+
+          {/* Theme Picker */}
+          <div className="pt-3 border-t border-[var(--border-subtle)]">
+            <label className="block text-xs text-[var(--text-muted)] mb-2">Theme</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => updateConfig({ theme: t.id })}
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs border transition-all ${
+                    config.theme === t.id
+                      ? "border-[var(--accent)] bg-[var(--accent-faint)] text-[var(--accent-light)]"
+                      : "border-[var(--border-primary)] text-[var(--text-muted)] hover:border-[var(--border-medium)] hover:text-[var(--text-secondary)]"
+                  }`}
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-white/10"
+                    style={{ background: `linear-gradient(135deg, ${t.swatch[0]}, ${t.swatch[1]})` }}
+                  />
+                  {t.label}
+                  {config.theme === t.id && (
+                    <svg className="ml-auto w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M5 13l4 4L19 7"/>
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* View Toggle */}
         <div className="px-4 pt-4 pb-2">
-          <div className="grid grid-cols-2 gap-0.5 rounded-lg bg-gray-800/60 p-0.5">
+          <div className="grid grid-cols-2 gap-0.5 rounded-lg bg-[var(--bg-ui)] p-0.5">
             <button
               onClick={() => setActiveView("chat")}
               className={`py-1.5 text-xs rounded-md transition-all font-medium ${
-                activeView === "chat" ? "bg-violet-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                activeView === "chat" ? "bg-violet-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
               💬 Chat
@@ -328,7 +364,7 @@ export default function Sidebar({
             <button
               onClick={() => setActiveView("devtools")}
               className={`py-1.5 text-xs rounded-md transition-all font-medium ${
-                activeView === "devtools" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                activeView === "devtools" ? "bg-emerald-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
               ⚡ More Tools
@@ -336,7 +372,7 @@ export default function Sidebar({
             <button
               onClick={() => setActiveView("jira")}
               className={`py-1.5 text-xs rounded-md transition-all font-medium ${
-                activeView === "jira" ? "bg-blue-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                activeView === "jira" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
               🔵 JIRA
@@ -344,7 +380,7 @@ export default function Sidebar({
             <button
               onClick={() => setActiveView("ba")}
               className={`py-1.5 text-xs rounded-md transition-all font-medium ${
-                activeView === "ba" ? "bg-amber-600 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                activeView === "ba" ? "bg-amber-600 text-white shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
               📋 BA Tools
@@ -354,8 +390,8 @@ export default function Sidebar({
 
         {/* Capabilities (Chat view only) */}
         {activeView === "chat" && (
-          <div className="px-4 py-3 border-b border-gray-800/80">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Capabilities</p>
+          <div className="px-4 py-3 border-b border-[var(--border-subtle)]">
+            <p className="text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider mb-3">Capabilities</p>
             <div className="space-y-0.5">
               {CAPABILITIES.map((cap, i) => (
                 <button
@@ -366,7 +402,7 @@ export default function Sidebar({
                   className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     activeMode === cap.id
                       ? "bg-violet-600/20 text-violet-300 border border-violet-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-ui)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <span className="text-base w-5 text-center">{cap.icon}</span>
@@ -381,7 +417,7 @@ export default function Sidebar({
         {/* JIRA Tools (JIRA view) */}
         {activeView === "jira" && (
           <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">JIRA Tools</p>
+            <p className="text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider mb-3">JIRA Tools</p>
             <div className="space-y-0.5">
               {JIRA_TOOLS.map((tool, i) => (
                 <button
@@ -391,7 +427,7 @@ export default function Sidebar({
                   className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     activeMode === tool.id
                       ? "bg-blue-600/20 text-blue-300 border border-blue-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-ui)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <span className="text-base w-5 text-center">{tool.icon}</span>
@@ -406,7 +442,7 @@ export default function Sidebar({
         {/* Additional Tools (devtools view) */}
         {activeView === "devtools" && (
           <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">More Tools</p>
+            <p className="text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider mb-3">More Tools</p>
             <div className="space-y-0.5">
               {DEV_TOOLS.map((tool, i) => (
                 <button
@@ -416,7 +452,7 @@ export default function Sidebar({
                   className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     activeMode === tool.id
                       ? "bg-emerald-600/20 text-emerald-300 border border-emerald-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-ui)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <span className="text-base w-5 text-center">{tool.icon}</span>
@@ -431,7 +467,7 @@ export default function Sidebar({
         {/* BA Tools (ba view) */}
         {activeView === "ba" && (
           <div className="px-4 py-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">BA Tools</p>
+            <p className="text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider mb-3">BA Tools</p>
             <div className="space-y-0.5">
               {BA_TOOLS.map((tool, i) => (
                 <button
@@ -441,7 +477,7 @@ export default function Sidebar({
                   className={`nav-item-enter w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     activeMode === tool.id
                       ? "bg-amber-600/20 text-amber-300 border border-amber-600/40"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-ui)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <span className="text-base w-5 text-center">{tool.icon}</span>
@@ -454,12 +490,12 @@ export default function Sidebar({
         )}
 
         {/* ── Activity History — visible in all views ── */}
-        <div className="px-4 py-3 border-t border-gray-800/60">
+        <div className="px-4 py-3 border-t border-[var(--border-subtle)]">
           {/* Header */}
           <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => setHistoryOpen((o) => !o)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-faint)] uppercase tracking-wider hover:text-[var(--text-secondary)] transition-colors"
             >
               <svg
                 viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -469,7 +505,7 @@ export default function Sidebar({
               </svg>
               Activity
               {history.length > 0 && (
-                <span className="ml-1 bg-gray-700 text-gray-400 text-xs px-1.5 py-0.5 rounded-full font-normal">
+                <span className="ml-1 bg-[var(--bg-ui)] text-[var(--text-muted)] text-xs px-1.5 py-0.5 rounded-full font-normal">
                   {history.length}
                 </span>
               )}
@@ -478,7 +514,7 @@ export default function Sidebar({
             {history.length > 0 && historyOpen && (
               confirmClear ? (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-400">Sure?</span>
+                  <span className="text-xs text-[var(--text-muted)]">Sure?</span>
                   <button
                     onClick={() => { onClearHistory(); setConfirmClear(false); }}
                     className="text-xs text-red-400 hover:text-red-300 px-1"
@@ -487,7 +523,7 @@ export default function Sidebar({
                   </button>
                   <button
                     onClick={() => setConfirmClear(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 px-1"
+                    className="text-xs text-[var(--text-faint)] hover:text-[var(--text-secondary)] px-1"
                   >
                     No
                   </button>
@@ -495,7 +531,7 @@ export default function Sidebar({
               ) : (
                 <button
                   onClick={() => setConfirmClear(true)}
-                  className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                  className="text-xs text-[var(--text-ghost)] hover:text-[var(--text-muted)] transition-colors"
                 >
                   Clear all
                 </button>
@@ -506,7 +542,7 @@ export default function Sidebar({
           {/* List */}
           {historyOpen && (
             history.length === 0 ? (
-              <p className="text-xs text-gray-600 italic px-1 py-2">
+              <p className="text-xs text-[var(--text-ghost)] italic px-1 py-2">
                 No activity yet — start using any tool!
               </p>
             ) : (
@@ -515,21 +551,21 @@ export default function Sidebar({
                   <div
                     key={conv.id}
                     style={{ animationDelay: `${i * 25}ms` }}
-                    className="animate-fade-up group flex items-start gap-2 rounded-lg hover:bg-gray-800/70 transition-colors cursor-pointer pr-1"
+                    className="animate-fade-up group flex items-start gap-2 rounded-lg hover:bg-[var(--bg-ui)] transition-colors cursor-pointer pr-1"
                     onClick={() => onLoadConversation(conv)}
                   >
                     <div className="flex-1 min-w-0 px-3 py-2">
-                      <p className="text-xs text-gray-300 truncate leading-snug group-hover:text-white transition-colors">
+                      <p className="text-xs text-[var(--text-secondary)] truncate leading-snug group-hover:text-[var(--text-heading)] transition-colors">
                         {conv.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-[var(--text-ghost)]">
                           {relativeTime(conv.timestamp)}
                         </span>
                         {conv.model && (
                           <>
-                            <span className="text-gray-700">·</span>
-                            <span className="text-xs text-gray-600 truncate max-w-[90px]">
+                            <span className="text-[var(--text-ghost)]">·</span>
+                            <span className="text-xs text-[var(--text-ghost)] truncate max-w-[90px]">
                               {conv.model.split("/").pop().split("-").slice(0, 3).join("-")}
                             </span>
                           </>
@@ -538,7 +574,7 @@ export default function Sidebar({
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); onDeleteConversation(conv.id); }}
-                      className="flex-shrink-0 mt-2 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all p-1 rounded"
+                      className="flex-shrink-0 mt-2 opacity-0 group-hover:opacity-100 text-[var(--text-ghost)] hover:text-red-400 transition-all p-1 rounded"
                       title="Delete"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
@@ -554,15 +590,15 @@ export default function Sidebar({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-800/80 flex flex-col gap-2">
+      <div className="px-4 py-3 border-t border-[var(--border-subtle)] flex flex-col gap-2">
         <button
           onClick={() => setReportOpen(true)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-400 hover:text-red-300 hover:bg-red-900/20 border border-gray-800 hover:border-red-700/40 transition-all"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-muted)] hover:text-red-300 hover:bg-red-900/20 border border-[var(--border-subtle)] hover:border-red-700/40 transition-all"
         >
           <span>🐛</span>
           <span>Report an Issue</span>
         </button>
-        <p className="text-xs text-gray-600 text-center">
+        <p className="text-xs text-[var(--text-ghost)] text-center">
           {PROVIDER_LABELS[config.provider]
             ? `via ${PROVIDER_LABELS[config.provider]}`
             : "AI-Powered QA Assistant"}

@@ -15,7 +15,7 @@ function CopyButton({ text }) {
   return (
     <button
       onClick={copy}
-      className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
+      className="text-xs px-2 py-1 rounded bg-[var(--bg-ui)] hover:bg-[var(--bg-ui-hover)] text-[var(--text-secondary)] transition-colors"
     >
       {copied ? "✓ Copied" : "Copy"}
     </button>
@@ -27,9 +27,9 @@ const CodeBlock = ({ node, inline, className, children, ...props }) => {
   const code = String(children).replace(/\n$/, "");
   if (!inline && match) {
     return (
-      <div className="my-2 rounded-xl overflow-hidden border border-gray-700/60">
-        <div className="flex items-center justify-between bg-[#1a1f2e] px-4 py-1.5">
-          <span className="text-xs text-gray-400 font-mono">{match[1]}</span>
+      <div className="my-2 rounded-xl overflow-hidden border border-[var(--border-primary)]">
+        <div className="flex items-center justify-between bg-[var(--bg-elevated)] px-4 py-1.5">
+          <span className="text-xs text-[var(--text-muted)] font-mono">{match[1]}</span>
           <CopyButton text={code} />
         </div>
         <SyntaxHighlighter
@@ -45,7 +45,7 @@ const CodeBlock = ({ node, inline, className, children, ...props }) => {
     );
   }
   return (
-    <code className="bg-gray-700/60 text-violet-300 px-1.5 py-0.5 rounded text-[0.85em] font-mono" {...props}>
+    <code className="bg-[var(--bg-ui)] text-[var(--accent-light)] px-1.5 py-0.5 rounded text-[0.85em] font-mono" {...props}>
       {children}
     </code>
   );
@@ -200,7 +200,7 @@ export default function Message({ message, setActiveMode, setActiveView }) {
               ? "bg-red-900/30 border border-red-700/60 text-red-200 rounded-tl-sm"
               : isUser
               ? "bg-gradient-to-br from-violet-600 to-violet-700 text-white rounded-tr-sm shadow-md shadow-violet-900/30"
-              : "bg-[#1a1f2e] text-gray-100 rounded-tl-sm border border-gray-700/60 shadow-sm"
+              : "bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-tl-sm border border-[var(--border-primary)] shadow-sm"
           }`}
         >
           {isUser ? (
@@ -219,9 +219,9 @@ export default function Message({ message, setActiveMode, setActiveView }) {
           )}
         </div>
         <div className="flex items-center gap-2 px-1">
-          {time && <span className="text-xs text-gray-600">{time}</span>}
+          {time && <span className="text-xs text-[var(--text-ghost)]">{time}</span>}
           {!isUser && message.content && (
-            <span className="text-xs text-gray-700" title="Estimated token count">
+            <span className="text-xs text-[var(--text-ghost)]" title="Estimated token count">
               ~{Math.round(message.content.length / 4).toLocaleString()} tokens
             </span>
           )}

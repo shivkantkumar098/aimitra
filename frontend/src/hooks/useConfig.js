@@ -5,7 +5,7 @@
  * never loses a previously entered key.
  *
  * Storage key: "qa_assistant_config"
- * Storage shape: { provider, model, apiKeys: {groq, gemini, anthropic, openai, mistral, deepseek, xai, together, perplexity, cerebras, openrouter, fireworks, cohere}, temperature, streaming }
+ * Storage shape: { provider, model, apiKeys: {groq, gemini, anthropic, openai, mistral, deepseek, xai, together, perplexity, cerebras, openrouter, fireworks, cohere}, temperature, streaming, theme }
  *
  * Exposed API:
  *   config      — full config object (provider, model, apiKeys, temperature, streaming)
@@ -30,6 +30,7 @@ const defaultConfig = {
   },
   temperature: 0.7,
   streaming: true,
+  theme: "dark",
 };
 
 export function useConfig() {

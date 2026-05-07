@@ -106,7 +106,7 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
   const canSend = (text.trim() || attachedFiles.length > 0) && !isLoading;
 
   return (
-    <div className="border-t border-gray-800/80 bg-[#0a0a15] px-4 pt-3 pb-4">
+    <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)] px-4 pt-3 pb-4">
       {/* Capability switcher pills */}
       <div className="flex gap-1.5 overflow-x-auto pb-3 scrollbar-none">
         {CAPABILITIES.map((cap) => (
@@ -118,7 +118,7 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
             className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
               activeMode === cap.id
                 ? "bg-violet-600/20 text-violet-300 border-violet-500/40 shadow-sm"
-                : "text-gray-500 border-gray-700/50 hover:text-gray-300 hover:border-gray-600"
+                : "text-[var(--text-faint)] border-[var(--border-primary)] hover:text-[var(--text-secondary)] hover:border-[var(--border-medium)]"
             }`}
           >
             <span className="text-sm leading-none">{cap.icon}</span>
@@ -133,11 +133,11 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
           {attachedFiles.map((f, i) => (
             <div
               key={i}
-              className="flex items-center gap-1.5 bg-[#1a1f2e] border border-violet-600/30 px-2.5 py-1.5 rounded-lg text-xs"
+              className="flex items-center gap-1.5 bg-[var(--bg-elevated)] border border-violet-600/30 px-2.5 py-1.5 rounded-lg text-xs"
             >
               <span className="text-base leading-none">{fileIcon(f.name)}</span>
-              <span className="text-gray-200 font-medium max-w-[120px] truncate">{f.name}</span>
-              <span className="text-gray-500">{fmtSize(f.size)}</span>
+              <span className="text-[var(--text-primary)] font-medium max-w-[120px] truncate">{f.name}</span>
+              <span className="text-[var(--text-faint)]">{fmtSize(f.size)}</span>
               <button
                 type="button"
                 onClick={() => removeFile(i)}
@@ -159,8 +159,8 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
         <div
           className={`flex-1 rounded-2xl border transition-colors overflow-hidden ${
             attachedFiles.length > 0
-              ? "border-violet-600/40 bg-[#141921]"
-              : "border-gray-700/80 bg-[#141921] focus-within:border-violet-500/60"
+              ? "border-violet-600/40 bg-[var(--bg-surface)]"
+              : "border-[var(--border-primary)] bg-[var(--bg-surface)] focus-within:border-violet-500/60"
           }`}
         >
           <textarea
@@ -175,7 +175,7 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
             }
             rows={1}
             disabled={isLoading}
-            className="w-full bg-transparent text-gray-200 text-sm px-4 pt-3 pb-1 resize-none focus:outline-none placeholder-gray-600 disabled:opacity-50 leading-relaxed"
+            className="w-full bg-transparent text-[var(--text-primary)] text-sm px-4 pt-3 pb-1 resize-none focus:outline-none placeholder-[var(--text-ghost)] disabled:opacity-50 leading-relaxed"
           />
           <div className="flex items-center px-3 pb-2 pt-0.5 gap-3">
             <button
@@ -183,7 +183,7 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
               onClick={() => fileInputRef.current?.click()}
               disabled={attachedFiles.length >= MAX_FILES || isLoading}
               title="Attach a text/code file"
-              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-violet-400 disabled:opacity-30 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[var(--text-faint)] hover:text-violet-400 disabled:opacity-30 transition-colors"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" strokeLinecap="round" strokeLinejoin="round"/>
@@ -195,14 +195,14 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
                 </span>
               )}
             </button>
-            <span className="ml-auto text-xs text-gray-700">⏎ send · ⇧⏎ newline</span>
+            <span className="ml-auto text-xs text-[var(--text-ghost)]">⏎ send · ⇧⏎ newline</span>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={!canSend}
-          className={`w-11 h-11 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-800 disabled:border disabled:border-gray-700 disabled:cursor-not-allowed rounded-2xl flex items-center justify-center transition-all flex-shrink-0 shadow-md shadow-violet-900/30 ${canSend && !isLoading ? "animate-glow-pulse" : ""}`}
+          className={`w-11 h-11 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--bg-ui)] disabled:border disabled:border-[var(--border-primary)] disabled:cursor-not-allowed rounded-2xl flex items-center justify-center transition-all flex-shrink-0 shadow-md ${canSend && !isLoading ? "animate-glow-pulse" : ""}`}
         >
           {isLoading ? (
             <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">

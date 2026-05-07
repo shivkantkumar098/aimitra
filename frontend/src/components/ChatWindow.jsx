@@ -24,21 +24,21 @@ export default function ChatWindow({
   }, [messages, isLoading]);
 
   return (
-    <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0a0a15]">
+    <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[var(--bg-primary)]">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 md:px-6 py-3.5 border-b border-gray-800/80 bg-[#0d0d1a] flex-shrink-0">
+      <header className="flex items-center justify-between px-4 md:px-6 py-3.5 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] flex-shrink-0">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger */}
           <button
             onClick={onToggleSidebar}
-            className="md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+            className="md:hidden p-1.5 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-ui)] rounded-lg transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
             </svg>
           </button>
           <div>
-            <h2 className="text-sm font-semibold text-white">
+            <h2 className="text-sm font-semibold text-[var(--text-heading)]">
               {activeCapability ? (
                 <span className="flex items-center gap-2">
                   <span>{activeCapability.icon}</span>
@@ -46,7 +46,7 @@ export default function ChatWindow({
                 </span>
               ) : "Chat"}
             </h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-[var(--text-faint)]">
               {messages.length === 0
                 ? activeCapability?.description ?? "Start a conversation"
                 : `${messages.length} message${messages.length !== 1 ? "s" : ""}`}
@@ -55,7 +55,7 @@ export default function ChatWindow({
         </div>
         <button
           onClick={onNewChat}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-gray-200 text-xs rounded-xl border border-gray-700/60 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-ui)] hover:bg-[var(--bg-ui-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs rounded-xl border border-[var(--border-primary)] transition-all"
         >
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
