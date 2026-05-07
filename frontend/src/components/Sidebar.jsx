@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CAPABILITIES, MODELS } from "../utils/capabilities";
 import ModelIcon from "./ModelIcon";
+import ReportIssueModal from "./ReportIssueModal";
 
 function relativeTime(isoString) {
   const diff = Date.now() - new Date(isoString).getTime();
@@ -145,6 +146,7 @@ export default function Sidebar({
   const [showKey, setShowKey] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const savedProviders = Object.entries(config.apiKeys || {})
     .filter(([, v]) => v)
@@ -551,13 +553,22 @@ export default function Sidebar({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-800/80">
+      <div className="px-4 py-3 border-t border-gray-800/80 flex flex-col gap-2">
+        <button
+          onClick={() => setReportOpen(true)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-400 hover:text-red-300 hover:bg-red-900/20 border border-gray-800 hover:border-red-700/40 transition-all"
+        >
+          <span>🐛</span>
+          <span>Report an Issue</span>
+        </button>
         <p className="text-xs text-gray-600 text-center">
           {PROVIDER_LABELS[config.provider]
             ? `via ${PROVIDER_LABELS[config.provider]}`
             : "AI-Powered QA Assistant"}
         </p>
       </div>
+
+      {reportOpen && <ReportIssueModal onClose={() => setReportOpen(false)} />}
     </aside>
   );
 }
