@@ -1,6 +1,7 @@
-"""Issue report route — appends reports to Excel file."""
+"""Issue report route — appends reports to Excel file and saves screenshots."""
 
 import os
+import uuid
 from datetime import datetime, timezone
 
 import openpyxl
@@ -9,10 +10,13 @@ from fastapi.responses import FileResponse, JSONResponse
 
 router = APIRouter(tags=["report"])
 
-# Save issues.xlsx in the backend/ directory (one level up from routes/)
-ISSUES_FILE = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "issues.xlsx")
-)
+BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+ISSUES_FILE = os.path.join(BASE_DIR, "issues.xlsx")
+SCREENSHOTS_DIR = os.path.join(BASE_DIR, "issue_screenshots")
+
+
+def _ensure_dirs():
+    os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
 
 def _get_workbook():
@@ -27,7 +31,8 @@ def _get_workbook():
         ws.column_dimensions["C"].width = 28
         ws.column_dimensions["D"].width = 30
         ws.column_dimensions["E"].width = 65
-        ws.append(["#", "Timestamp (UTC)", "Reporter Email", "Page / Context", "Description", "Screenshot"])
+        ws.column_dimensions["F"].width = 40
+        ws.append(["#", "Timestamp (UTC)", "Reporter Email", "Page / Context", "Description", "Screenshot File"])
     return wb, ws
 
 
@@ -38,17 +43,23 @@ async def report_issue(
     page: str = Form(""),
     screenshot: UploadFile = File(None),
 ):
+    _ensure_dirs()
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    has_screenshot = "No"
+    screenshot_filename = "—"
 
     if screenshot and screenshot.filename:
-        await screenshot.read()  # consume the stream
-        has_screenshot = "Yes"
+        screenshot_bytes = await screenshot.read()
+        ext = os.path.splitext(screenshot.filename)[-1] or ".png"
+        unique_name = f"{uuid.uuid4().hex}{ext}"
+        save_path = os.path.join(SCREENSHOTS_DIR, unique_name)
+        with open(save_path, "wb") as f:
+            f.write(screenshot_bytes)
+        screenshot_filename = unique_name
 
     try:
         wb, ws = _get_workbook()
-        issue_num = ws.max_row  # row 1 = header
-        ws.append([issue_num, timestamp, reporter_email or "—", page or "—", description, has_screenshot])
+        issue_num = ws.max_row
+        ws.append([issue_num, timestamp, reporter_email or "—", page or "—", description, screenshot_filename])
         wb.save(ISSUES_FILE)
         return JSONResponse({"status": "ok", "message": "Issue recorded — thank you for the report!"})
     except Exception as e:
@@ -60,7 +71,6 @@ async def report_issue(
 
 @router.get("/api/issues")
 async def list_issues():
-    """Return all reported issues as JSON."""
     if not os.path.exists(ISSUES_FILE):
         return JSONResponse({"issues": [], "total": 0})
     try:
@@ -78,7 +88,6 @@ async def list_issues():
 
 @router.get("/api/issues/download")
 async def download_issues():
-    """Download the raw issues.xlsx file."""
     if not os.path.exists(ISSUES_FILE):
         return JSONResponse(status_code=404, content={"error": "No issues file found yet."})
     return FileResponse(
@@ -86,3 +95,13 @@ async def download_issues():
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename="aimitra-issues.xlsx",
     )
+
+
+@router.get("/api/issues/screenshot/{filename}")
+async def get_screenshot(filename: str):
+    # Prevent path traversal
+    safe_name = os.path.basename(filename)
+    path = os.path.join(SCREENSHOTS_DIR, safe_name)
+    if not os.path.exists(path):
+        return JSONResponse(status_code=404, content={"error": "Screenshot not found."})
+    return FileResponse(path)

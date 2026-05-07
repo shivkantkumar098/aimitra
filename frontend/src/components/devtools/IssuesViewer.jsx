@@ -3,6 +3,28 @@ import axios from "axios";
 
 const API_BASE = process.env.REACT_APP_API_URL || "";
 
+function ScreenshotThumb({ filename }) {
+  const [open, setOpen] = useState(false);
+  if (!filename || filename === "—") return <span className="text-xs text-gray-600">no screenshot</span>;
+  const src = `${API_BASE}/api/issues/screenshot/${filename}`;
+  return (
+    <>
+      <img
+        src={src}
+        alt="screenshot"
+        onClick={() => setOpen(true)}
+        className="h-14 rounded-lg border border-gray-700 cursor-pointer hover:border-violet-500 object-cover transition-colors"
+      />
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <img src={src} alt="screenshot full" className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl" />
+          <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white text-2xl leading-none">✕</button>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function IssuesViewer() {
   const [issues, setIssues] = useState([]);
   const [total, setTotal] = useState(0);
@@ -75,26 +97,24 @@ export default function IssuesViewer() {
           {issues.map((issue, i) => (
             <div key={i} className="bg-[#1a1f2e] border border-gray-700 rounded-xl overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-800 bg-[#111827]">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-rose-400">#{issue["#"]}</span>
                   <span className="text-xs text-gray-500">{issue["Timestamp (UTC)"]}</span>
                   {issue["Reporter Email"] && issue["Reporter Email"] !== "—" && (
                     <span className="text-xs text-violet-400">{issue["Reporter Email"]}</span>
                   )}
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  issue["Screenshot"] === "Yes"
-                    ? "bg-emerald-900/40 text-emerald-400"
-                    : "bg-gray-800 text-gray-500"
-                }`}>
-                  {issue["Screenshot"] === "Yes" ? "📸 screenshot" : "no screenshot"}
-                </span>
               </div>
-              <div className="px-4 py-3">
-                {issue["Page / Context"] && issue["Page / Context"] !== "—" && (
-                  <p className="text-xs text-gray-600 mb-2 truncate">📍 {issue["Page / Context"]}</p>
-                )}
-                <p className="text-sm text-gray-200 whitespace-pre-wrap">{issue["Description"]}</p>
+              <div className="px-4 py-3 flex gap-4">
+                <div className="flex-1 min-w-0">
+                  {issue["Page / Context"] && issue["Page / Context"] !== "—" && (
+                    <p className="text-xs text-gray-600 mb-2 truncate">📍 {issue["Page / Context"]}</p>
+                  )}
+                  <p className="text-sm text-gray-200 whitespace-pre-wrap">{issue["Description"]}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <ScreenshotThumb filename={issue["Screenshot File"]} />
+                </div>
               </div>
             </div>
           ))}
