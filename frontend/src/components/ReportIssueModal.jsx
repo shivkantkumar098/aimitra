@@ -5,6 +5,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "";
 
 export default function ReportIssueModal({ onClose }) {
   const [description, setDescription] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
   const [screenshot, setScreenshot] = useState(null);
   const [preview, setPreview] = useState(null);
   const [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
@@ -29,6 +30,7 @@ export default function ReportIssueModal({ onClose }) {
     setStatus("loading");
     const form = new FormData();
     form.append("description", description.trim());
+    form.append("reporter_email", reporterEmail.trim());
     form.append("page", window.location.href);
     if (screenshot) form.append("screenshot", screenshot);
     try {
@@ -75,6 +77,20 @@ export default function ReportIssueModal({ onClose }) {
               <p className="text-xs text-violet-300">
                 Describe what you observed, what you expected, and any steps to reproduce. A screenshot helps a lot!
               </p>
+            </div>
+
+            {/* Reporter Email */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5">
+                Your email <span className="text-gray-600">(optional — so we can follow up)</span>
+              </label>
+              <input
+                type="email"
+                value={reporterEmail}
+                onChange={e => setReporterEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-[#0d1117] text-gray-200 text-sm px-3 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-600"
+              />
             </div>
 
             {/* Description */}
