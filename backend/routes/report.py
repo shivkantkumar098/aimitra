@@ -1,4 +1,4 @@
-"""Issue report route — appends reports to Excel file and saves screenshots."""
+"""Issue report route — appends reports to Excel, uploads screenshots to Supabase Storage."""
 
 import os
 import uuid
@@ -12,11 +12,35 @@ router = APIRouter(tags=["report"])
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 ISSUES_FILE = os.path.join(BASE_DIR, "issues.xlsx")
-SCREENSHOTS_DIR = os.path.join(BASE_DIR, "issue_screenshots")
+BUCKET = "issue-screenshots"
 
 
-def _ensure_dirs():
-    os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
+def _supabase():
+    url = os.getenv("SUPABASE_URL", "").strip()
+    key = os.getenv("SUPABASE_ANON_KEY", "").strip()
+    if not url or not key:
+        return None
+    from supabase import create_client
+    return create_client(url, key)
+
+
+def _upload_screenshot(data: bytes, ext: str) -> str | None:
+    """Upload bytes to Supabase Storage and return the public URL, or None on failure."""
+    try:
+        sb = _supabase()
+        if not sb:
+            return None
+        filename = f"{uuid.uuid4().hex}{ext}"
+        content_type = "image/png" if ext in (".png", "") else "image/jpeg"
+        sb.storage.from_(BUCKET).upload(
+            filename,
+            data,
+            {"content-type": content_type, "upsert": "false"},
+        )
+        result = sb.storage.from_(BUCKET).get_public_url(filename)
+        return result
+    except Exception:
+        return None
 
 
 def _get_workbook():
@@ -31,8 +55,8 @@ def _get_workbook():
         ws.column_dimensions["C"].width = 28
         ws.column_dimensions["D"].width = 30
         ws.column_dimensions["E"].width = 65
-        ws.column_dimensions["F"].width = 40
-        ws.append(["#", "Timestamp (UTC)", "Reporter Email", "Page / Context", "Description", "Screenshot File"])
+        ws.column_dimensions["F"].width = 80
+        ws.append(["#", "Timestamp (UTC)", "Reporter Email", "Page / Context", "Description", "Screenshot URL"])
     return wb, ws
 
 
@@ -43,23 +67,19 @@ async def report_issue(
     page: str = Form(""),
     screenshot: UploadFile = File(None),
 ):
-    _ensure_dirs()
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    screenshot_filename = "—"
+    screenshot_url = "—"
 
     if screenshot and screenshot.filename:
-        screenshot_bytes = await screenshot.read()
-        ext = os.path.splitext(screenshot.filename)[-1] or ".png"
-        unique_name = f"{uuid.uuid4().hex}{ext}"
-        save_path = os.path.join(SCREENSHOTS_DIR, unique_name)
-        with open(save_path, "wb") as f:
-            f.write(screenshot_bytes)
-        screenshot_filename = unique_name
+        data = await screenshot.read()
+        ext = os.path.splitext(screenshot.filename)[-1].lower() or ".png"
+        url = _upload_screenshot(data, ext)
+        screenshot_url = url if url else "upload-failed"
 
     try:
         wb, ws = _get_workbook()
         issue_num = ws.max_row
-        ws.append([issue_num, timestamp, reporter_email or "—", page or "—", description, screenshot_filename])
+        ws.append([issue_num, timestamp, reporter_email or "—", page or "—", description, screenshot_url])
         wb.save(ISSUES_FILE)
         return JSONResponse({"status": "ok", "message": "Issue recorded — thank you for the report!"})
     except Exception as e:
@@ -95,13 +115,3 @@ async def download_issues():
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename="aimitra-issues.xlsx",
     )
-
-
-@router.get("/api/issues/screenshot/{filename}")
-async def get_screenshot(filename: str):
-    # Prevent path traversal
-    safe_name = os.path.basename(filename)
-    path = os.path.join(SCREENSHOTS_DIR, safe_name)
-    if not os.path.exists(path):
-        return JSONResponse(status_code=404, content={"error": "Screenshot not found."})
-    return FileResponse(path)

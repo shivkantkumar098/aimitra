@@ -3,21 +3,22 @@ import axios from "axios";
 
 const API_BASE = process.env.REACT_APP_API_URL || "";
 
-function ScreenshotThumb({ filename }) {
+function ScreenshotThumb({ url }) {
   const [open, setOpen] = useState(false);
-  if (!filename || filename === "—") return <span className="text-xs text-gray-600">no screenshot</span>;
-  const src = `${API_BASE}/api/issues/screenshot/${filename}`;
+  if (!url || url === "—" || url === "upload-failed") {
+    return <span className="text-xs text-gray-600">{url === "upload-failed" ? "⚠ upload failed" : "no screenshot"}</span>;
+  }
   return (
     <>
       <img
-        src={src}
+        src={url}
         alt="screenshot"
         onClick={() => setOpen(true)}
         className="h-14 rounded-lg border border-gray-700 cursor-pointer hover:border-violet-500 object-cover transition-colors"
       />
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setOpen(false)}>
-          <img src={src} alt="screenshot full" className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl" />
+          <img src={url} alt="screenshot full" className="max-w-[90vw] max-h-[85vh] rounded-xl shadow-2xl" />
           <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-white text-2xl leading-none">✕</button>
         </div>
       )}
@@ -113,7 +114,7 @@ export default function IssuesViewer() {
                   <p className="text-sm text-gray-200 whitespace-pre-wrap">{issue["Description"]}</p>
                 </div>
                 <div className="flex-shrink-0">
-                  <ScreenshotThumb filename={issue["Screenshot File"]} />
+                  <ScreenshotThumb url={issue["Screenshot URL"]} />
                 </div>
               </div>
             </div>
