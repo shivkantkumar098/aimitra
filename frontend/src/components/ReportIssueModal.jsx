@@ -32,9 +32,7 @@ export default function ReportIssueModal({ onClose }) {
     form.append("page", window.location.href);
     if (screenshot) form.append("screenshot", screenshot);
     try {
-      const res = await axios.post(`${API_BASE}/api/report-issue`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(`${API_BASE}/api/report-issue`, form);
       setStatus("success");
       setMessage(res.data.message);
     } catch (e) {
