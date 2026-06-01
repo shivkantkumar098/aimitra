@@ -11,20 +11,24 @@ AiMitra consolidates **30+ purpose-built AI tools** across 4 specialised workspa
 | | |
 |---|---|
 | 🤖 **13 AI Providers** | OpenAI, Anthropic, Gemini, Groq, Mistral, DeepSeek, xAI, Together, Perplexity, Cerebras, OpenRouter, Fireworks, Cohere |
-| 🧠 **50+ AI Models** | GPT-4o, Claude Sonnet, Gemini Flash, Llama 3.3, DeepSeek R1, and more |
+| 🧠 **50+ AI Models** | GPT-4o, Claude Sonnet, Gemini Flash, Llama 3.3, DeepSeek R1, and more — fetched **live** from each provider's API |
 | 🛠️ **30+ Specialised Tools** | Purpose-built for QA, BA, and Development workflows |
 | 💸 **Free to Use** | Works with free-tier providers (Groq, Gemini, Cerebras, OpenRouter) |
 | 🔐 **Privacy First** | API keys stored locally in browser — never sent to any server |
 | ⚡ **Real-time Streaming** | Token-by-token SSE streaming for all providers |
 | 🕓 **Conversation History** | Auto-saves every session with title, timestamp, and model info |
-| 🧩 **Chrome Extension** | Live DOM analysis → generate real test code from any webpage |
+| 📁 **File & Folder Upload** | Attach any text/code file or entire folder — no size limit |
+| ⚡ **Live Model List** | Model dropdown auto-fetches from provider API — always up to date |
+| 🧭 **Model Capability Warnings** | Warns when selected model may not support the active mode |
+| 💬 **Zero-token Local Replies** | Greetings and common messages answered instantly — no API call |
+| 🗜️ **Collapsible Sidebar** | Floating tab hides/shows sidebar to maximise workspace |
 
 ---
 
 ## 🗂️ Workspaces
 
 ### 💬 Chat & Code
-7 AI-powered modes with smart mode detection:
+6 AI-powered modes with smart mode detection:
 
 | Mode | Purpose |
 |------|---------|
@@ -33,15 +37,13 @@ AiMitra consolidates **30+ purpose-built AI tools** across 4 specialised workspa
 | Test Case Generator | Selenium / Playwright / pytest test cases |
 | Test Plan Generator | IEEE 829-compliant test plans |
 | DOM Locator Generator | XPath & CSS selectors for web automation |
-| Web Search | Current events, latest docs, live data queries |
-| Image Generation | Prompts for DALL-E / Midjourney / Stable Diffusion |
+| Web Search | Current events, latest docs, live data queries *(real-time with Perplexity only)* |
 
 ### ⚡ More Tools
-14 one-shot developer tools:
+13 one-shot developer tools:
 
 | Tool | Purpose |
 |------|---------|
-| 🧩 Chrome Extension | Generate tests from live browser DOM |
 | 🧭 Tool Helper | Guides you to the right AiMitra tool |
 | 🔍 Code Explainer | Plain-English breakdown of any code |
 | 🕵️ Code Review | Bugs, security, performance, SOLID analysis |
@@ -87,34 +89,62 @@ AiMitra consolidates **30+ purpose-built AI tools** across 4 specialised workspa
 
 ---
 
-## 🧠 Smart Mode Detector
+## 🧠 Smart Features
 
+### Auto Mode Detector
 AiMitra automatically detects when you're in the wrong mode and suggests the best tool — no extra API calls, just keyword analysis:
 
 - Paste a stack trace in Chat → suggests **Code Debugging**
-- Ask "write test cases" in general chat → suggests **Test Case Generator**
+- Ask "write test cases" → suggests **Test Case Generator**
 - Mention "xpath" or "css selector" → suggests **DOM Locator Generator**
 - Ask about "gherkin" or "BDD" → suggests **BDD Generator**
 - Mention "latest" or "today" → suggests **Web Search**
 
----
+### Live Model Auto-fetch
+When you enter an API key, the model dropdown is populated **live from the provider's API** — not a hardcoded list:
 
-## 🧩 Chrome Extension
+- Calls each provider's native model listing endpoint (`GET /v1/models`, Anthropic `/v1/models`, Gemini `/v1beta/models`)
+- Results cached in localStorage for **1 hour** — no repeated calls
+- A green **`⚡ live`** badge confirms the list came from the provider
+- Refresh button (↺) forces an immediate update
+- Falls back to built-in static list if the provider is unreachable
 
-The Chrome Extension brings AI-powered test generation directly into the browser:
+### File & Folder Upload
+Attach any text or code file — or an entire project folder — directly in the chat input:
 
-- Reads the **live DOM** of any webpage (real selectors, not guesses)
-- Captures forms, inputs, buttons, links, ARIA roles, `data-testid` attributes
-- Supports **4 frameworks**: Playwright, Selenium, Cypress, WebdriverIO
-- Supports **4 languages**: Python, JavaScript, TypeScript, Java
-- Supports **3 patterns**: POM, BDD/Gherkin, Simple
-- Configurable with all 13 AI providers
+- **No file size limit** and **no file count limit**
+- Folder upload reads all text/code files recursively (`webkitdirectory`)
+- 40+ supported extensions: `.py`, `.js`, `.ts`, `.jsx`, `.tsx`, `.java`, `.go`, `.rs`, `.sql`, `.yaml`, `.md`, `.feature`, and more
+- Binary files are automatically skipped with a count shown
+- Soft warning shown if total content may exceed the model's context window
+- File count + total size displayed; individual files removable
 
-**Install:**
-1. Open Chrome → `chrome://extensions/`
-2. Enable **Developer Mode**
-3. Click **Load Unpacked** → select the `chrome-extension/` folder
-4. AiMitra icon appears in the toolbar
+### Model Capability Warnings
+A yellow warning banner appears in the sidebar when the selected model may not handle the active mode well:
+
+| Scenario | Warning |
+|----------|---------|
+| Web Search + non-Perplexity model | No real-time search — training data only |
+| Reasoning model (o1, DeepSeek R1…) + JIRA/BDD/BA modes | May not follow structured output formats |
+| Small/lightweight model + complex structured tasks | May produce incomplete output |
+| Codestral + non-coding modes | Code-specialist model, poor for JIRA/BA |
+
+### Zero-token Local Replies
+Common messages are answered instantly by the frontend — **no API call, no tokens used**:
+
+- Greetings: *hi, hello, hey, good morning…*
+- Meta questions: *who are you, what can you do, how are you…*
+- Acknowledgements: *thanks, ok, got it, bye…*
+
+Each local reply is labelled **`⚡ local · 0 tokens`** so savings are visible.
+
+### Web Search — Model Compatibility
+A blue info banner appears at the top of the chat when Web Search mode is active:
+
+| Model type | Capability |
+|-----------|-----------|
+| **Perplexity** (Sonar Pro, Sonar) | Real-time web search via live index |
+| All other models | Training data only — knowledge cutoff applies |
 
 ---
 
@@ -155,7 +185,8 @@ npm start
 1. Open the app in browser
 2. Sidebar → **Provider**: select `Groq` (free, no credit card)
 3. Paste your API key → green ✓ confirms it's saved
-4. Start chatting!
+4. Model list fetches automatically — look for the **`⚡ live`** badge
+5. Start chatting!
 
 ---
 
@@ -169,7 +200,7 @@ npm start
 | React Markdown + remark-gfm | Rich markdown rendering (tables, code blocks) |
 | React Syntax Highlighter | VS Code Dark+ themed code blocks |
 | Axios + Fetch API | Axios for non-streaming; Fetch for SSE streaming |
-| localStorage | Persists config, API keys, chat history — no account needed |
+| localStorage | Persists config, API keys, chat history, model cache |
 
 ### Backend
 | Technology | Role |
@@ -194,51 +225,50 @@ aimitra/
 │   ├── .env.example
 │   ├── routes/
 │   │   ├── chat.py                 # /api/chat + /api/chat/stream endpoints
-│   │   ├── auth.py                 # Supabase auth routes
+│   │   ├── models.py               # /api/models — live model list from provider APIs
+│   │   ├── health.py               # /api/health + /api/capabilities
 │   │   ├── analyzer.py             # DOM / page analyzer endpoint
+│   │   ├── jira_api.py             # JIRA integration endpoints
+│   │   ├── report.py               # Bug report submission
 │   │   └── download.py             # File download endpoint
-│   └── services/
-│       ├── openai_service.py       # OpenAI + compatible providers
-│       ├── anthropic_service.py    # Anthropic Claude
-│       ├── gemini_service.py       # Google Gemini
-│       ├── groq_service.py         # Groq
-│       └── prompt_router.py        # Mode → system prompt mapping
+│   ├── services/
+│   │   ├── openai_compat_service.py  # OpenAI + all compatible providers
+│   │   ├── anthropic_service.py      # Anthropic Claude
+│   │   ├── gemini_service.py         # Google Gemini
+│   │   └── groq_service.py           # Groq
+│   └── utils/
+│       └── prompt_router.py          # Mode → system prompt mapping
 │
 ├── frontend/
 │   └── src/
-│       ├── App.js                  # Root: 4-view layout (chat/devtools/jira/ba)
+│       ├── App.js                  # Root: 4-view layout + sidebar collapse state
 │       ├── hooks/
 │       │   ├── useConfig.js        # Config + API key state
-│       │   ├── useChat.js          # Chat state + send/stream logic
+│       │   ├── useChat.js          # Chat state + send/stream + local reply intercept
 │       │   ├── useChatHistory.js   # Conversation history (localStorage)
+│       │   ├── useModels.js        # Live model fetch + 1-hr localStorage cache
 │       │   └── useAiQuery.js       # One-shot query hook for tool components
 │       ├── services/
 │       │   └── chatService.js      # API calls (streaming + non-streaming)
 │       ├── utils/
-│       │   ├── capabilities.js     # Mode + model definitions
+│       │   ├── capabilities.js     # Mode + model definitions + getCapabilityWarning()
 │       │   └── modeDetector.js     # Smart mode suggestion engine
 │       └── components/
-│           ├── Sidebar.jsx         # Config + nav + history
-│           ├── ChatWindow.jsx      # Chat layout + header
-│           ├── ChatInput.jsx       # Message input + send
-│           ├── Message.jsx         # Markdown bubble + suggestion card
-│           ├── devtools/           # 14 More Tools components
+│           ├── Sidebar.jsx         # Config + nav + history + live model badge
+│           ├── ChatWindow.jsx      # Chat layout + web search info banner
+│           ├── ChatInput.jsx       # Message input + file/folder upload
+│           ├── Message.jsx         # Markdown bubble + local reply badge
+│           ├── devtools/           # 13 More Tools components
 │           │   ├── DevPanel.jsx
 │           │   ├── BddGenerator.jsx
 │           │   ├── ApiTestGenerator.jsx
-│           │   ├── ChromeExtension.jsx
-│           │   └── ... (11 more)
+│           │   └── ... (10 more)
 │           ├── jira/               # 7 JIRA tool components
 │           │   ├── JiraPanel.jsx
 │           │   └── ... (7 tool components)
 │           └── ba/                 # 10 BA tool components
 │               ├── BAPanel.jsx
 │               └── ... (10 tool components)
-│
-├── chrome-extension/
-│   ├── manifest.json               # Manifest V3
-│   ├── popup.html / popup.js       # Extension UI + AI call logic
-│   └── content.js                  # DOM analysis injected into pages
 │
 ├── generate_docs.py                # PDF documentation generator
 ├── generate_docs_word.py           # Word documentation generator
@@ -248,6 +278,8 @@ aimitra/
 ---
 
 ## 🤖 AI Providers & Models
+
+> Model lists are fetched **live** from each provider's API when an API key is entered. The table below shows representative models — your actual dropdown will reflect the provider's current offerings.
 
 | Provider | Tier | Notable Models |
 |----------|------|----------------|
@@ -261,7 +293,7 @@ aimitra/
 | DeepSeek | Paid | deepseek-v3, deepseek-r1 (thinking) |
 | xAI (Grok) | Paid | grok-3, grok-3-mini, grok-2 |
 | Together AI | Paid | llama-3.3-70b, qwen, deepseek-r1 |
-| Perplexity | Paid | sonar-pro, sonar, r1-1776 |
+| Perplexity | Paid | sonar-pro, sonar *(real-time web search)* |
 | Fireworks AI | Paid | llama-3.3-70b, deepseek-r1 |
 | Cohere | Paid | command-r+, command-r |
 
@@ -307,15 +339,9 @@ docker run -p 8000:8000 aimitra
 
 ## 📚 Documentation
 
-Full application documentation (all tools, demo data, architecture) is available in two formats:
+Full application documentation (all tools, demo data, architecture) available as a Word document:
 
 ```bash
-# PDF (dark theme, 18 pages)
-pip install fpdf2
-python generate_docs.py
-# Output: AiMitra_Documentation.pdf
-
-# Word Document (.docx)
 pip install python-docx
 python generate_docs_word.py
 # Output: AiMitra_Documentation.docx
@@ -330,7 +356,8 @@ python generate_docs_word.py
 | QA-specialised prompts | ✅ | ❌ | ❌ | Partial |
 | BA tools (BRD, Gap Analysis…) | ✅ | ❌ | ❌ | ❌ |
 | JIRA integration | ✅ | ❌ | ❌ | ❌ |
-| Chrome Extension (live DOM) | ✅ | ❌ | ❌ | ✅ |
+| File & folder upload | ✅ | Partial | ❌ | ❌ |
+| Live model auto-fetch | ✅ | ❌ | ❌ | ❌ |
 | 13 AI providers | ✅ | ❌ (1) | ❌ (1) | ❌ |
 | Free tier capable | ✅ | Partial | ❌ | ❌ |
 | Conversation history | ✅ | ✅ | N/A | N/A |
