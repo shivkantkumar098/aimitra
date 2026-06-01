@@ -41,13 +41,6 @@ export const CAPABILITIES = [
     description: "Research technical topics and documentation",
     examples: ["Latest Playwright docs", "React hooks best practices"],
   },
-  {
-    id: "image_generation",
-    label: "Image Generation",
-    icon: "🎨",
-    description: "Generate image prompts and descriptions",
-    examples: ["Dark UI mockup", "System architecture diagram"],
-  },
 ];
 
 export const MODELS = [
@@ -127,3 +120,80 @@ export const MODELS = [
   { id: "command-r-plus-08-2024", name: "Command R+",  provider: "cohere", logoProvider: "cohere" },
   { id: "command-r-08-2024",      name: "Command R",   provider: "cohere", logoProvider: "cohere" },
 ];
+
+// Models that use chain-of-thought reasoning — may not follow strict structured output
+const REASONING_MODELS = new Set([
+  "o1", "o3-mini", "deepseek-reasoner",
+  "deepseek-ai/DeepSeek-R1", "accounts/fireworks/models/deepseek-r1",
+  "deepseek/deepseek-r1:free", "r1-1776",
+]);
+
+// Very small / lightweight models — may struggle with complex structured tasks
+const SMALL_MODELS = new Set([
+  "llama-3.1-8b-instant", "llama-3.1-8b",
+  "meta-llama/Llama-3.1-8B-Instruct-Turbo",
+  "gemma-3-12b-it", "gemma2-9b-it",
+  "gemini-2.0-flash-lite",
+  "mistral-nemo",
+]);
+
+// Modes that produce structured or formatted output (JIRA, BDD, test plans, etc.)
+const STRUCTURED_MODES = new Set([
+  "jira_bug", "jira_create", "jira_rovo", "jira_jql", "jira_plan", "jira_validate", "jira_comment",
+  "ba_user_story", "ba_acceptance", "ba_use_case", "ba_requirements", "ba_process_flow",
+  "ba_brd", "ba_gap", "ba_stakeholder", "ba_meeting", "ba_impact",
+  "bdd", "test_generation", "test_plan", "dom_locator", "api_test",
+]);
+
+// Modes where heavy reasoning adds no value but hurts structured output
+const REASONING_POOR_MODES = STRUCTURED_MODES;
+
+/**
+ * Returns a warning object { level: "warning"|"error", message: string }
+ * or null when the model+mode combo is fine.
+ */
+export function getCapabilityWarning(modelId, provider, modeId) {
+  if (!modelId || !modeId) return null;
+
+  // Web Search — only Perplexity supports real-time search
+  if (modeId === "web_search" && provider !== "perplexity") {
+    return {
+      level: "warning",
+      message: "This model does not support real-time web search. Responses will be based on training data only. Switch to a Perplexity model for live results.",
+    };
+  }
+
+  // Reasoning models + structured output modes
+  if (REASONING_MODELS.has(modelId) && REASONING_POOR_MODES.has(modeId)) {
+    return {
+      level: "warning",
+      message: "Reasoning models think step-by-step and may not follow structured output formats reliably. For best results, use a standard chat model (e.g. GPT-4o, Claude Sonnet).",
+    };
+  }
+
+  // Small models + complex structured modes
+  if (SMALL_MODELS.has(modelId) && STRUCTURED_MODES.has(modeId)) {
+    return {
+      level: "warning",
+      message: "This lightweight model may produce incomplete or low-quality output for complex structured tasks. Consider upgrading to a larger model.",
+    };
+  }
+
+  // Codestral is code-only — poor for JIRA / BA / natural-language modes
+  if (modelId === "codestral-latest") {
+    const nonCodeModes = new Set([
+      "jira_bug", "jira_create", "jira_rovo", "jira_jql", "jira_plan", "jira_validate", "jira_comment",
+      "ba_user_story", "ba_acceptance", "ba_use_case", "ba_requirements", "ba_process_flow",
+      "ba_brd", "ba_gap", "ba_stakeholder", "ba_meeting", "ba_impact",
+      "text_generation",
+    ]);
+    if (nonCodeModes.has(modeId)) {
+      return {
+        level: "warning",
+        message: "Codestral is a code-specialized model. It may produce poor results for non-coding tasks. Switch to Mistral Large or another general model.",
+      };
+    }
+  }
+
+  return null;
+}

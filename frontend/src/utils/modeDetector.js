@@ -38,10 +38,6 @@ export function detectBetterMode(text, activeMode) {
     if (has(t, "latest news", "current events", "today", "this week", "this month", "right now", "recent", "trending", "what happened", "news about", "live ", "real-time")) {
       return { type: "mode", mode: "web_search", view: "chat", icon: "🔍", label: "Web Search" };
     }
-    // Image generation
-    if (has(t, "generate image", "create image", "draw ", "make a picture", "make an image", "visualize", "dall-e", "stable diffusion", "create a logo", "generate a logo")) {
-      return { type: "mode", mode: "image_generation", view: "chat", icon: "🎨", label: "Image Generation" };
-    }
     // BDD / Gherkin
     if (has(t, "bdd", "gherkin", "feature file", "given when then", "given that", "scenario outline", "cucumber")) {
       return { type: "mode", mode: "bdd", view: "devtools", icon: "🥒", label: "BDD Generator" };
@@ -119,14 +115,6 @@ export function detectBetterMode(text, activeMode) {
     const needsLiveData = has(t, "latest", "today", "current", "recent", "news", "now", "this week", "live", "trending", "price of", "stock", "weather");
     if (!needsLiveData && (GENERAL_QUESTION(t) || CODE_KEYWORDS.some(w => t.includes(w)) || TEST_KEYWORDS.some(w => t.includes(w)))) {
       return { type: "mode", mode: "text_generation", view: "chat", icon: "💬", label: "General Chat", hint: "Web Search is for live data. For coding or testing questions, General Chat gives better structured answers." };
-    }
-  }
-
-  // ── Image Generation — non-image question ────────────────────────────────
-  if (activeMode === "image_generation") {
-    const isAboutImages = has(t, "image", "picture", "photo", "draw", "generate", "create", "logo", "icon", "illustration", "visual", "design", "art");
-    if (!isAboutImages && (GENERAL_QUESTION(t) || CODE_KEYWORDS.some(w => t.includes(w)) || TEST_KEYWORDS.some(w => t.includes(w)))) {
-      return { type: "mode", mode: "text_generation", view: "chat", icon: "💬", label: "General Chat", hint: "Image Generation is for creating visuals. For text, code, or testing questions, switch to General Chat." };
     }
   }
 

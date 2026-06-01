@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { CAPABILITIES, MODELS } from "../utils/capabilities";
+import { CAPABILITIES, MODELS, getCapabilityWarning } from "../utils/capabilities";
 import ModelIcon from "./ModelIcon";
 import ReportIssueModal from "./ReportIssueModal";
 
@@ -71,7 +71,6 @@ const BA_TOOLS = [
 ];
 
 const DEV_TOOLS = [
-  { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★" },
   { id: "model_compare",   icon: "⚡", label: "Model Compare ★" },
   { id: "issues_viewer",   icon: "🐛", label: "Reported Issues" },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper" },
@@ -149,7 +148,7 @@ export default function Sidebar({
   config, updateConfig, apiKey, setApiKey,
   activeMode, setActiveMode, activeView, setActiveView,
   onNewChat, history = [], onLoadConversation, onDeleteConversation, onClearHistory,
-  isOpen = false, onClose,
+  isOpen = false, onClose, collapsed = false, onCollapse,
 }) {
   const [showKey, setShowKey] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(true);
@@ -164,7 +163,7 @@ export default function Sidebar({
   const activeModels = MODELS.filter((m) => m.provider === config.provider);
 
   return (
-    <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[var(--bg-sidebar)] border-r border-[var(--border-subtle)] flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+    <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[var(--bg-sidebar)] border-r border-[var(--border-subtle)] flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} ${collapsed ? "md:hidden" : ""}`}>
       {/* Logo + New Chat */}
       <div className="px-4 py-3 border-b border-[var(--border-subtle)] flex items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -488,6 +487,21 @@ export default function Sidebar({
             </div>
           </div>
         )}
+
+        {/* ── Model capability warning ── */}
+        {(() => {
+          const warn = getCapabilityWarning(config.model, config.provider, activeMode);
+          if (!warn) return null;
+          return (
+            <div className="mx-3 mb-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex gap-2 items-start">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <p className="text-xs text-amber-300 leading-relaxed">{warn.message}</p>
+            </div>
+          );
+        })()}
 
         {/* ── Activity History — visible in all views ── */}
         <div className="px-4 py-3 border-t border-[var(--border-subtle)]">

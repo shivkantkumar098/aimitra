@@ -14,6 +14,7 @@ export default function App() {
   const [activeMode, setActiveMode] = useState("text_generation");
   const [activeView, setActiveView] = useState("chat"); // "chat" | "jira" | "devtools" | "ba"
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = config.theme || "dark";
@@ -26,7 +27,7 @@ export default function App() {
       if (!ctrl) return;
       switch (e.key) {
         case "k": e.preventDefault(); handleNewChat(); break;
-        case "/": e.preventDefault(); setSidebarOpen(o => !o); break;
+        case "/": e.preventDefault(); setSidebarOpen(o => !o); setSidebarCollapsed(false); break;
         case "1": e.preventDefault(); handleSetView("chat"); break;
         case "2": e.preventDefault(); handleSetView("devtools"); break;
         case "3": e.preventDefault(); handleSetView("jira"); break;
@@ -141,7 +142,22 @@ export default function App() {
         onClearHistory={clearHistory}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onCollapse={() => setSidebarCollapsed(true)}
       />
+
+      {/* Desktop sidebar edge toggle tab */}
+      <button
+        onClick={() => setSidebarCollapsed(c => !c)}
+        title={sidebarCollapsed ? "Show sidebar (Ctrl+/)" : "Hide sidebar (Ctrl+/)"}
+        className={`hidden md:flex fixed top-1/2 -translate-y-1/2 z-50 items-center justify-center w-5 h-12 bg-[var(--bg-sidebar)] border border-[var(--border-subtle)] text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-ui)] transition-all duration-300 shadow-md ${sidebarCollapsed ? "left-0 border-l-0 rounded-r-lg" : "left-72 border-r-0 rounded-l-none rounded-r-lg"}`}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+          {sidebarCollapsed
+            ? <path d="M9 18l6-6-6-6" />
+            : <path d="M15 18l-6-6 6-6" />}
+        </svg>
+      </button>
 
       {activeView === "chat" ? (
         <ChatWindow

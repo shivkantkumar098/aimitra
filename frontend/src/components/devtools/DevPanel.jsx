@@ -12,12 +12,10 @@ import BddGenerator from "./BddGenerator";
 import ApiTestGenerator from "./ApiTestGenerator";
 import A11yChecker from "./A11yChecker";
 import ToolHelper from "./ToolHelper";
-import ChromeExtension from "./ChromeExtension";
 import ModelCompare from "./ModelCompare";
 import IssuesViewer from "./IssuesViewer";
 
 const TOOLS = [
-  { id: "chrome_ext",      icon: "🧩", label: "Chrome Extension ★",   component: ChromeExtension },
   { id: "model_compare",   icon: "⚡", label: "Model Compare ★",      component: ModelCompare },
   { id: "issues_viewer",   icon: "🐛", label: "Reported Issues",      component: IssuesViewer },
   { id: "tool_helper",     icon: "🧭", label: "Tool Helper",          component: ToolHelper },
