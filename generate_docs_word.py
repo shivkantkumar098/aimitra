@@ -337,8 +337,12 @@ toc = [
     ("  7.1–7.7", "All JIRA Tools with demo data", True),
     ("8.", "BA Tools Workspace", False),
     ("  8.1–8.10", "All BA Tools with demo data", True),
-    ("9.", "AI Providers & Models", False),
+    ("9.", "AI Providers & Models (Live Auto-fetch)", False),
     ("10.", "Architecture & Data Flow", False),
+    ("  10.1", "API Endpoints", True),
+    ("  10.2", "Model Auto-fetch Flow", True),
+    ("  10.3", "Chat Request Flows (Non-Streaming & Streaming)", True),
+    ("  10.4", "Security Design & Deployment", True),
     ("11.", "About the Developer", False),
 ]
 
@@ -429,7 +433,10 @@ d.body(
     "AiMitra supports 13 AI providers (OpenAI, Anthropic, Google Gemini, Groq, Mistral, DeepSeek, xAI/Grok, "
     "Together AI, Perplexity, Cerebras, OpenRouter, Fireworks AI, Cohere) and 50+ individual models. "
     "API keys are entered by the user, stored in localStorage, and forwarded per-request. They are never "
-    "stored on the server. All providers support both streaming (SSE) and non-streaming modes."
+    "stored on the server. All providers support both streaming (SSE) and non-streaming modes. "
+    "When an API key is set, the model list is fetched live from each provider's own models API "
+    "(e.g. GET /v1/models for OpenAI-compatible providers, Anthropic's /v1/models, Gemini's /v1beta/models) "
+    "so the dropdown always reflects the latest available models — not a stale hardcoded list."
 )
 
 add_page_break(d.doc)
@@ -468,6 +475,12 @@ usps = [
     ("Collapsible Sidebar",
      "A floating tab on the sidebar border lets users hide or show the sidebar on desktop with one click or Ctrl+/. "
      "Maximises screen space for the chat/tool area without losing sidebar access."),
+    ("Live Model Auto-fetch",
+     "When an API key is entered, AiMitra calls the provider's own model listing API (/v1/models for "
+     "OpenAI-compatible providers, Anthropic's /v1/models, Gemini's /v1beta/models) and populates the "
+     "model dropdown with the real-time list. Results are cached in localStorage for 1 hour to avoid "
+     "redundant API calls. A '⚡ live' badge shows when the list is live; a refresh button (↺) lets users "
+     "force-update at any time. Falls back to the built-in static list if the provider is unreachable."),
     ("Conversation History",
      "Every chat and tool output is auto-saved to local history with timestamp, model, and title. Resume any "
      "previous conversation with a single click. Stored in your browser only."),
@@ -527,7 +540,7 @@ for i, s in enumerate(steps_start, 1):
 d.h2("Configuration Options")
 configs = [
     ("Provider", "Choose from 13 AI providers. Switch at any time."),
-    ("Model", "Select any model from the chosen provider's list."),
+    ("Model", "Select any model from the chosen provider's list. When an API key is entered, AiMitra fetches the live model list directly from the provider's API (cached 1 hour). A green '⚡ live' badge confirms live data; a refresh button forces an immediate update."),
     ("Temperature", "0.0 = precise/deterministic. 1.0 = creative/varied. Default: 0.7."),
     ("Streaming", "Toggle real-time token streaming on/off."),
     ("API Key", "Stored in browser localStorage. Never sent to any server except the chosen AI provider."),
@@ -932,6 +945,29 @@ d.body(
     "FastAPI backend acts as a secure proxy between the user and AI provider APIs."
 )
 
+d.h2("API Endpoints")
+for ep, method, desc in [
+    ("/api/chat",         "POST", "Non-streaming chat — returns full response as JSON {response, mode}"),
+    ("/api/chat/stream",  "POST", "Streaming chat — returns SSE tokens as data:{chunk} events"),
+    ("/api/models",       "GET",  "Live model list — fetches available models from the provider's API using the supplied api_key. Supports all 13 providers. Returns {models:[{id,name,provider,logoProvider}], source:'live'} or {source:'error'} on failure."),
+    ("/api/health",       "GET",  "Health check — returns service status and version"),
+    ("/api/capabilities", "GET",  "Lists all supported capability modes"),
+    ("/api/jira/*",       "POST", "JIRA integration endpoints (create, search, comment, etc.)"),
+    ("/api/analyze",      "POST", "Screenshot / issue analyzer"),
+    ("/api/report",       "POST", "Bug report submission"),
+]:
+    p = d.doc.add_paragraph()
+    p.paragraph_format.left_indent = Inches(0.3)
+    p.paragraph_format.space_after = Pt(2)
+    r1 = p.add_run(f"{method} {ep}:  ")
+    r1.font.bold = True
+    r1.font.size = Pt(9.5)
+    r1.font.color.rgb = PURPLE_LIGHT
+    r1.font.name = "Courier New"
+    r2 = p.add_run(desc)
+    r2.font.size = Pt(9.5)
+    r2.font.color.rgb = DARK_TEXT
+
 d.h2("Request Flow — Non-Streaming")
 steps_arch = [
     "User types a message and clicks Send",
@@ -943,6 +979,20 @@ steps_arch = [
     "Response text is returned to FastAPI -> JSON response to React -> rendered as markdown",
 ]
 for i, s in enumerate(steps_arch, 1):
+    d.numbered(s, i)
+
+d.h2("Model Auto-fetch Flow")
+steps_models = [
+    "User enters API key in the sidebar",
+    "useModels hook checks localStorage cache (TTL: 1 hour)",
+    "If cache miss or force-refresh: React calls GET /api/models?provider=X&api_key=Y",
+    "FastAPI routes/models.py calls the provider's model listing API (e.g. GET /v1/models)",
+    "Response is normalised to [{id, name, provider, logoProvider}] and returned",
+    "Frontend caches result in localStorage and populates the model dropdown",
+    "A green '⚡ live' badge confirms the list came from the provider's live API",
+    "Falls back to the built-in static list if the provider returns an error",
+]
+for i, s in enumerate(steps_models, 1):
     d.numbered(s, i)
 
 d.h2("Request Flow — Streaming (SSE)")
