@@ -13,6 +13,7 @@ from routes.chat import router as chat_router
 from routes.download import router as download_router
 from routes.health import router as health_router
 from routes.jira_api import router as jira_router
+from routes.models import router as models_router
 from routes.report import router as report_router
 
 load_dotenv()
@@ -36,6 +37,7 @@ app.include_router(analyzer_router)
 app.include_router(download_router)
 app.include_router(chat_router)
 app.include_router(jira_router)
+app.include_router(models_router)
 app.include_router(report_router)
 
 # Serve React frontend (built into backend/static by build.sh)

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { CAPABILITIES, MODELS, getCapabilityWarning } from "../utils/capabilities";
+import { CAPABILITIES, getCapabilityWarning } from "../utils/capabilities";
+import { useModels } from "../hooks/useModels";
 import ModelIcon from "./ModelIcon";
 import ReportIssueModal from "./ReportIssueModal";
 
@@ -160,7 +161,14 @@ export default function Sidebar({
     .map(([k]) => k);
 
   const hint = PROVIDER_HINTS[config.provider];
-  const activeModels = MODELS.filter((m) => m.provider === config.provider);
+  const { models: activeModels, loading: modelsLoading, isAuto: modelsAuto, refresh: refreshModels } = useModels(config.provider, apiKey);
+
+  // When live model list loads, ensure current model is valid — reset to first if not
+  useEffect(() => {
+    if (activeModels.length > 0 && !activeModels.find((m) => m.id === config.model)) {
+      updateConfig({ model: activeModels[0].id });
+    }
+  }, [activeModels]); // eslint-disable-line
 
   return (
     <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 h-screen bg-[var(--bg-sidebar)] border-r border-[var(--border-subtle)] flex flex-col overflow-hidden transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} ${collapsed ? "md:hidden" : ""}`}>
@@ -211,8 +219,7 @@ export default function Sidebar({
                 <span
                   key={p}
                   onClick={() => {
-                    const first = MODELS.find((m) => m.provider === p);
-                    updateConfig({ provider: p, model: first?.id || "" });
+                    updateConfig({ provider: p, model: "" }); // model resets via useEffect once list loads
                   }}
                   title={`Switch to ${PROVIDER_LABELS[p]}`}
                   className={`cursor-pointer text-xs px-2 py-0.5 rounded-full border transition-all ${
@@ -233,8 +240,7 @@ export default function Sidebar({
             <select
               value={config.provider}
               onChange={(e) => {
-                const first = MODELS.find((m) => m.provider === e.target.value);
-                updateConfig({ provider: e.target.value, model: first?.id || "" });
+                updateConfig({ provider: e.target.value, model: "" }); // model resets via useEffect
               }}
               className="w-full bg-[var(--bg-input)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2 border border-[var(--border-primary)] focus:outline-none focus:border-violet-500 transition-colors"
             >
@@ -246,7 +252,34 @@ export default function Sidebar({
 
           {/* Model — custom dropdown with icons */}
           <div className="mb-3">
-            <label className="block text-xs text-[var(--text-muted)] mb-1">Model</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-[var(--text-muted)]">Model</label>
+              <div className="flex items-center gap-1.5">
+                {modelsLoading && (
+                  <svg className="animate-spin w-3 h-3 text-violet-400" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/>
+                    <path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z"/>
+                  </svg>
+                )}
+                {modelsAuto && !modelsLoading && (
+                  <span className="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded-full">
+                    ⚡ live
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={refreshModels}
+                  disabled={modelsLoading || !apiKey}
+                  title="Refresh model list from provider"
+                  className="text-[var(--text-faint)] hover:text-violet-400 disabled:opacity-30 transition-colors"
+                >
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M23 4v6h-6M1 20v-6h6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
             <ModelDropdown
               models={activeModels}
               value={config.model}
