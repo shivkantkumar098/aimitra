@@ -64,6 +64,26 @@ export default function ChatWindow({
         </button>
       </header>
 
+      {/* Web Search info banner */}
+      {activeMode === "web_search" && (
+        <div className="mx-4 md:mx-6 mt-3 px-4 py-3 rounded-xl bg-blue-950/40 border border-blue-700/40 flex gap-3 items-start flex-shrink-0">
+          <span className="text-blue-400 mt-0.5 flex-shrink-0">🌐</span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-blue-300 mb-1">Web Search — Model Compatibility</p>
+            <p className="text-xs text-blue-200/80 leading-relaxed">
+              <span className="text-green-400 font-medium">Real-time search (live web data):</span>{" "}
+              <span className="text-white/80">Perplexity — Sonar Pro, Sonar</span>
+              <span className="text-blue-300/60 ml-1">(data from Bing + Perplexity's live web index)</span>
+            </p>
+            <p className="text-xs text-blue-200/80 leading-relaxed mt-0.5">
+              <span className="text-amber-400 font-medium">Training data only (no live search):</span>{" "}
+              <span className="text-white/60">All other models (GPT, Claude, Gemini, Llama, etc.)</span>
+              <span className="text-blue-300/60 ml-1">— knowledge cutoff applies, results may be outdated.</span>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {messages.length === 0 ? (

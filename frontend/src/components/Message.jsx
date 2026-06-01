@@ -220,7 +220,12 @@ export default function Message({ message, setActiveMode, setActiveView }) {
         </div>
         <div className="flex items-center gap-2 px-1">
           {time && <span className="text-xs text-[var(--text-ghost)]">{time}</span>}
-          {!isUser && message.content && (
+          {!isUser && message.isLocal && (
+            <span className="text-xs text-emerald-500/70 font-medium" title="Answered locally — no API call, no tokens used">
+              ⚡ local · 0 tokens
+            </span>
+          )}
+          {!isUser && message.content && !message.isLocal && (
             <span className="text-xs text-[var(--text-ghost)]" title="Estimated token count">
               ~{Math.round(message.content.length / 4).toLocaleString()} tokens
             </span>

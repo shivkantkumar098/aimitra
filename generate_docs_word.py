@@ -337,10 +337,9 @@ toc = [
     ("  7.1–7.7", "All JIRA Tools with demo data", True),
     ("8.", "BA Tools Workspace", False),
     ("  8.1–8.10", "All BA Tools with demo data", True),
-    ("9.", "Chrome Extension", False),
-    ("10.", "AI Providers & Models", False),
-    ("11.", "Architecture & Data Flow", False),
-    ("12.", "About the Developer", False),
+    ("9.", "AI Providers & Models", False),
+    ("10.", "Architecture & Data Flow", False),
+    ("11.", "About the Developer", False),
 ]
 
 for num, title, is_sub in toc:
@@ -455,9 +454,20 @@ usps = [
      "in chat? It suggests Test Case Generator. Uses keyword analysis with no extra API calls."),
     ("Real-time Streaming",
      "Every AI response streams token-by-token to the UI. No waiting for the full response."),
-    ("Chrome Extension",
-     "The built-in Chrome extension reads the live DOM of any webpage, captures real CSS selectors and XPaths, "
-     "and generates test code grounded in the actual page — not generic placeholders."),
+    ("File & Folder Upload",
+     "Attach individual text/code files or entire project folders directly in the chat. All text and code formats "
+     "are supported with no hard size limit — content is inlined into the prompt. A soft warning appears if total "
+     "size may exceed the model's context window."),
+    ("Model Capability Warnings",
+     "A yellow warning banner appears in the sidebar whenever the selected model is unlikely to perform well for "
+     "the active mode — e.g. reasoning models on structured JIRA/BDD output, small models on complex tasks, or "
+     "any non-Perplexity model on Web Search mode."),
+    ("Token-free Local Replies",
+     "Common messages (greetings, 'what can you do', 'thanks', 'bye', etc.) are answered instantly by the frontend "
+     "without any API call. Replies are labelled '⚡ local · 0 tokens' to make token savings visible."),
+    ("Collapsible Sidebar",
+     "A floating tab on the sidebar border lets users hide or show the sidebar on desktop with one click or Ctrl+/. "
+     "Maximises screen space for the chat/tool area without losing sidebar access."),
     ("Conversation History",
      "Every chat and tool output is auto-saved to local history with timestamp, model, and title. Resume any "
      "previous conversation with a single click. Stored in your browser only."),
@@ -509,7 +519,7 @@ steps_start = [
     "Switch to More Tools (top nav) to access Code Review, BDD Generator, API Test Generator, and more.",
     "Switch to BA Tools to access User Story Generator, BRD Generator, Gap Analysis, and more.",
     "Switch to JIRA to create tickets, validate stories, or generate JQL queries.",
-    "Install the Chrome Extension from the chrome-extension/ folder to generate tests from any webpage.",
+    "Upload files or entire folders using the File / Folder buttons in the chat input — all text and code files are supported with no size limit.",
 ]
 for i, s in enumerate(steps_start, 1):
     d.numbered(s, i)
@@ -582,19 +592,14 @@ chat_tools = [
      '<button class="btn-primary" id="submit-order" aria-label="Place Order">Place Order</button>',
      "Returns CSS selector, XPath, and Playwright/Selenium code snippets."),
 
-    ("🔍", "Web Search",
+    ("🌐", "Web Search",
      "When you need current information — latest library versions, recent CVEs, today's news.",
-     "Uses the AI's broad knowledge to answer time-sensitive questions with references.",
-     "Select Web Search mode -> type your query -> submit.",
+     "Real-time web search is available only with Perplexity models (Sonar Pro, Sonar) which query a live web index. "
+     "All other models (GPT, Claude, Gemini, Llama, etc.) rely on training data — results may be outdated. "
+     "A compatibility banner in the chat window shows which models support live search.",
+     "Select Web Search mode -> an info banner shows model compatibility -> type your query -> submit.",
      "What are the latest breaking changes in Playwright 1.44 and how do they affect existing tests?",
-     "Returns a summary of breaking changes, migration guide, and links to the official changelog."),
-
-    ("🎨", "Image Generation",
-     "When you need to describe or prompt an image for design, wireframing, or documentation.",
-     "Returns detailed image prompts for DALL-E/Midjourney since direct generation depends on provider.",
-     "Select Image Generation mode -> describe what you want -> submit.",
-     "Create a logo for a software testing tool called 'AiMitra'. Modern, dark theme, violet and blue gradient, robot icon.",
-     "Returns a detailed DALL-E/Stable Diffusion prompt plus design specifications."),
+     "With Perplexity Sonar: returns live web results with citations. With other models: returns training-data answer with caveat."),
 ]
 
 for icon, name, when, why, how, demo, note in chat_tools:
@@ -607,18 +612,11 @@ add_page_break(d.doc)
 # ─────────────────────────────────────────────────────────────────────────────
 d.h1("6. More Tools Workspace", EMERALD)
 d.body(
-    "The More Tools workspace contains 14 specialised one-shot tools for developers. Each tool has a dedicated UI "
+    "The More Tools workspace contains 13 specialised one-shot tools for developers. Each tool has a dedicated UI "
     "with options (language, framework, pattern), a focused system prompt, and a copy/download button for the output."
 )
 
 dev_tools = [
-    ("🧩", "Chrome Extension",
-     "When you need to generate test code for a live webpage directly from your browser.",
-     "Reads the actual DOM — real CSS selectors, XPaths, form structures — and feeds them to AI.",
-     "Install from chrome-extension/ folder -> open any webpage -> click extension icon -> Generate.",
-     "Open https://automationpractice.pl/ in Chrome, click the extension, pick Playwright + Python + POM, click Generate.",
-     "Returns a complete POM class + test file using real selectors from the live page."),
-
     ("🧭", "Tool Helper",
      "When you are not sure which AiMitra tool to use for your task.",
      "Guides you to the right tool by matching your goal to the best workspace/tool.",
@@ -869,47 +867,9 @@ for icon, name, when, why, how, demo, note in ba_tools:
 add_page_break(d.doc)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 9 — CHROME EXTENSION
+# SECTION 9 — PROVIDERS
 # ─────────────────────────────────────────────────────────────────────────────
-d.h1("9. Chrome Extension")
-d.body(
-    "The AiMitra Chrome Extension brings AI-powered test generation directly into the browser. It reads the live "
-    "DOM of any webpage and generates complete, runnable test scripts using the actual CSS selectors, XPaths, "
-    "and form structures found on the page — no generic placeholders."
-)
-
-d.h2("Features")
-for f in [
-    "DOM analysis: captures forms, inputs, buttons, links, ARIA roles, data-testid attributes",
-    "4 frameworks: Playwright, Selenium, Cypress, WebdriverIO",
-    "4 languages: Python, JavaScript, TypeScript, Java",
-    "3 patterns: POM (Page Object Model), BDD/Gherkin, Simple function-based",
-    "13 AI providers configurable — same providers as the main app",
-    "Auto-injects content script into pages opened before extension was loaded",
-]:
-    d.bullet(f)
-
-d.h2("Installation")
-for step in [
-    "Open Chrome and navigate to chrome://extensions/",
-    "Enable 'Developer Mode' (toggle, top right)",
-    "Click 'Load Unpacked'",
-    "Select the chrome-extension/ folder from the AiMitra project",
-    "The AiMitra icon appears in the Chrome toolbar",
-]:
-    d.bullet(step)
-
-d.h2("Demo")
-d.code_box("Navigate to any site", "https://automationpractice.pl/index.php?controller=authentication")
-d.code_box("Configure and generate", "Framework: Playwright | Pattern: POM | Language: Python -> Click Generate")
-d.body("Expected: A complete Python POM class with real selectors plus a test file with login happy path and negative test cases.")
-
-d.divider()
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SECTION 10 — PROVIDERS
-# ─────────────────────────────────────────────────────────────────────────────
-d.h1("10. AI Providers & Models")
+d.h1("9. AI Providers & Models")
 
 providers = [
     ("Google Gemini", "Free", "gemini-2.0-flash, gemini-1.5-flash, gemma-3-27b", "Best free option for vision and large context"),
@@ -964,9 +924,9 @@ d.doc.add_paragraph()
 d.divider()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 11 — ARCHITECTURE
+# SECTION 10 — ARCHITECTURE
 # ─────────────────────────────────────────────────────────────────────────────
-d.h1("11. Architecture & Data Flow")
+d.h1("10. Architecture & Data Flow")
 d.body(
     "AiMitra uses a clean client-server architecture where the React frontend handles all UI state and the "
     "FastAPI backend acts as a secure proxy between the user and AI provider APIs."
@@ -1012,9 +972,9 @@ for item in [
 d.divider()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SECTION 12 — DEVELOPER
+# SECTION 11 — DEVELOPER
 # ─────────────────────────────────────────────────────────────────────────────
-d.h1("12. About the Developer", AMBER_LIGHT)
+d.h1("11. About the Developer", AMBER_LIGHT)
 
 # Developer card
 table_dev = d.doc.add_table(rows=1, cols=1)
