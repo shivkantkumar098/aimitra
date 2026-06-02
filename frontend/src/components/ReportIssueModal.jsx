@@ -2,10 +2,18 @@ import { useState, useRef } from "react";
 import axios from "axios";
 
 const API_BASE = process.env.REACT_APP_API_URL || "";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function validateEmail(val) {
+  if (!val.trim()) return null;       // empty is fine — it's optional
+  if (!EMAIL_RE.test(val.trim())) return "Please enter a valid email address (e.g. you@example.com).";
+  return null;
+}
 
 export default function ReportIssueModal({ onClose }) {
   const [description, setDescription] = useState("");
   const [reporterEmail, setReporterEmail] = useState("");
+  const [emailError, setEmailError] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [preview, setPreview] = useState(null);
   const [status, setStatus] = useState(null); // null | "loading" | "success" | "error"
@@ -27,6 +35,8 @@ export default function ReportIssueModal({ onClose }) {
 
   const submit = async () => {
     if (!description.trim()) return;
+    const emailErr = validateEmail(reporterEmail);
+    if (emailErr) { setEmailError(emailErr); return; }
     setStatus("loading");
     const form = new FormData();
     form.append("description", description.trim());
@@ -87,10 +97,21 @@ export default function ReportIssueModal({ onClose }) {
               <input
                 type="email"
                 value={reporterEmail}
-                onChange={e => setReporterEmail(e.target.value)}
+                onChange={e => { setReporterEmail(e.target.value); setEmailError(validateEmail(e.target.value)); }}
+                onBlur={e => setEmailError(validateEmail(e.target.value))}
                 placeholder="you@example.com"
-                className="w-full bg-[#0d1117] text-gray-200 text-sm px-3 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:border-violet-500 placeholder-gray-600"
+                className={`w-full bg-[#0d1117] text-gray-200 text-sm px-3 py-2.5 rounded-lg border focus:outline-none placeholder-gray-600 transition-colors ${
+                  emailError ? "border-red-500 focus:border-red-400" : "border-gray-700 focus:border-violet-500"
+                }`}
               />
+              {emailError && (
+                <p className="text-xs text-red-400 mt-1.5 flex items-center gap-1">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3 flex-shrink-0">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  {emailError}
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -152,7 +173,7 @@ export default function ReportIssueModal({ onClose }) {
             <div className="flex items-center gap-3 pt-1">
               <button
                 onClick={submit}
-                disabled={!description.trim() || status === "loading"}
+                disabled={!description.trim() || !!emailError || status === "loading"}
                 className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 {status === "loading" ? (

@@ -184,6 +184,7 @@ export default function App() {
           setActiveView={handleSetView}
           onNewChat={handleNewChat}
           onToggleSidebar={toggleSidebar}
+          config={config}
         />
       ) : activeView === "devtools" ? (
         <div className="flex-1 min-w-0 overflow-hidden">

@@ -7,6 +7,10 @@ const TEXT_EXTS = new Set(ACCEPT_EXTS.split(",").map((e) => e.replace(".", "")))
 // Files that have no extension but are commonly text
 const EXTENSIONLESS_TEXT = new Set(["dockerfile", "makefile", "jenkinsfile", "procfile", "vagrantfile"]);
 
+const MAX_FILES       = 10;
+const MAX_FILE_SIZE   = 1 * 1024 * 1024;  // 1 MB per file
+const MAX_TOTAL_SIZE  = 5 * 1024 * 1024;  // 5 MB total hard limit
+
 function isTextFile(name) {
   const lower = name.toLowerCase();
   const ext = lower.split(".").pop();
@@ -51,31 +55,41 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
 
   const readFiles = (fileList) => {
     setFileError(null);
-    const files = Array.from(fileList).filter((f) => isTextFile(f.name));
-    const skipped = Array.from(fileList).length - files.length;
+    const incoming = Array.from(fileList).filter((f) => isTextFile(f.name));
+    const skipped = Array.from(fileList).length - incoming.length;
 
-    if (files.length === 0) {
+    if (incoming.length === 0) {
       setFileError("No supported text/code files found.");
       return;
     }
+
+    // Per-file size check
+    const tooLarge = incoming.filter((f) => f.size > MAX_FILE_SIZE);
+    if (tooLarge.length > 0) {
+      setFileError(`${tooLarge.map(f => f.name).join(", ")} exceed${tooLarge.length === 1 ? "s" : ""} the 1 MB per-file limit and were skipped.`);
+    }
+    const files = incoming.filter((f) => f.size <= MAX_FILE_SIZE);
+
+    if (files.length === 0) return;
 
     files.forEach((file) => {
       const ext = file.name.split(".").pop().toLowerCase();
       const reader = new FileReader();
       reader.onload = (ev) => {
         setAttachedFiles((prev) => {
-          // Avoid duplicates by name
-          if (prev.some((p) => p.name === file.name)) return prev;
+          if (prev.some((p) => p.name === file.name)) return prev;  // skip duplicates
+          if (prev.length >= MAX_FILES) {
+            setFileError(`Max ${MAX_FILES} files allowed. Extra files were skipped.`);
+            return prev;
+          }
           return [...prev, { name: file.name, content: ev.target.result, size: file.size, ext }];
         });
       };
-      reader.onerror = () => {
-        setFileError(`Failed to read ${file.name}`);
-      };
+      reader.onerror = () => setFileError(`Failed to read ${file.name}`);
       reader.readAsText(file, "UTF-8");
     });
 
-    if (skipped > 0) {
+    if (skipped > 0 && !tooLarge.length) {
       setFileError(`${skipped} binary/unsupported file${skipped > 1 ? "s" : ""} skipped (only text & code files supported).`);
     }
   };
@@ -127,9 +141,10 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
     setText(e.target.value);
   };
 
-  const canSend = (text.trim() || attachedFiles.length > 0) && !isLoading;
   const total = totalSize(attachedFiles);
-  const isLarge = total > 200 * 1024; // soft warning above 200 KB total
+  const isOverLimit = total > MAX_TOTAL_SIZE;
+  const isSoftWarn  = !isOverLimit && total > 200 * 1024;
+  const canSend = (text.trim() || attachedFiles.length > 0) && !isLoading && !isOverLimit;
 
   return (
     <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-primary)] px-4 pt-3 pb-4">
@@ -158,8 +173,11 @@ export default function ChatInput({ onSend, isLoading, activeMode, setActiveMode
         <div className="mb-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-xs text-[var(--text-faint)]">
-              {attachedFiles.length} file{attachedFiles.length !== 1 ? "s" : ""} · {fmtSize(total)}
-              {isLarge && (
+              {attachedFiles.length}/{MAX_FILES} files · {fmtSize(total)} / {fmtSize(MAX_TOTAL_SIZE)}
+              {isOverLimit && (
+                <span className="ml-2 text-red-400 font-medium">⛔ Over 5 MB limit — remove files to send</span>
+              )}
+              {isSoftWarn && (
                 <span className="ml-2 text-amber-400">⚠ Large — may exceed model context window</span>
               )}
             </span>

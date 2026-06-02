@@ -15,6 +15,7 @@ export default function ChatWindow({
   setActiveView,
   onNewChat,
   onToggleSidebar,
+  config = {},
 }) {
   const bottomRef = useRef(null);
   const activeCapability = CAPABILITIES.find((c) => c.id === activeMode);
@@ -65,24 +66,35 @@ export default function ChatWindow({
         </button>
       </header>
 
-      {/* Web Search info banner */}
+      {/* Web Search banner */}
       {activeMode === "web_search" && (
-        <div className="mx-4 md:mx-6 mt-3 px-4 py-3 rounded-xl bg-blue-950/40 border border-blue-700/40 flex gap-3 items-start flex-shrink-0">
-          <span className="text-blue-400 mt-0.5 flex-shrink-0">🌐</span>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-blue-300 mb-1">Web Search — Model Compatibility</p>
-            <p className="text-xs text-blue-200/80 leading-relaxed">
-              <span className="text-green-400 font-medium">Real-time search (live web data):</span>{" "}
-              <span className="text-white/80">Perplexity — Sonar Pro, Sonar</span>
-              <span className="text-blue-300/60 ml-1">(data from Bing + Perplexity's live web index)</span>
-            </p>
-            <p className="text-xs text-blue-200/80 leading-relaxed mt-0.5">
-              <span className="text-amber-400 font-medium">Training data only (no live search):</span>{" "}
-              <span className="text-white/60">All other models (GPT, Claude, Gemini, Llama, etc.)</span>
-              <span className="text-blue-300/60 ml-1">— knowledge cutoff applies, results may be outdated.</span>
+        config.provider === "perplexity" ? (
+          /* Perplexity → green "live search" confirmation */
+          <div className="mx-4 md:mx-6 mt-3 px-4 py-2.5 rounded-xl bg-emerald-950/40 border border-emerald-700/40 flex gap-2.5 items-center flex-shrink-0">
+            <span className="text-emerald-400 flex-shrink-0">🌐</span>
+            <p className="text-xs text-emerald-300">
+              <strong>Live web search active</strong> — Perplexity will query the web in real time.
             </p>
           </div>
-        </div>
+        ) : (
+          /* Any other provider → amber warning */
+          <div className="mx-4 md:mx-6 mt-3 px-4 py-3 rounded-xl bg-amber-950/40 border border-amber-600/50 flex gap-3 items-start flex-shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-amber-300 mb-1">⚠ No live web search — training data only</p>
+              <p className="text-xs text-amber-200/80 leading-relaxed">
+                <strong className="text-white">{config.provider?.toUpperCase() || "This model"}</strong> cannot browse the internet.
+                Responses are based on training data and may be outdated or inaccurate for recent events.
+              </p>
+              <p className="text-xs text-amber-200/60 mt-0.5">
+                For real-time web results, switch to <strong className="text-amber-300">Provider → Perplexity</strong> (Sonar Pro or Sonar).
+              </p>
+            </div>
+          </div>
+        )
       )}
 
       {/* Messages */}
