@@ -31,7 +31,8 @@ export default function ChatWindow({
           {/* Mobile hamburger */}
           <button
             onClick={onToggleSidebar}
-            className="md:hidden p-1.5 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-ui)] rounded-lg transition-colors"
+            title="Toggle sidebar (Ctrl+/)"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-ui)] rounded-lg transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>

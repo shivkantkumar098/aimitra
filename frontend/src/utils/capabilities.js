@@ -41,7 +41,17 @@ export const CAPABILITIES = [
     description: "Research technical topics and documentation",
     examples: ["Latest Playwright docs", "React hooks best practices"],
   },
+  {
+    id: "image_generation",
+    label: "Image Generation",
+    icon: "🎨",
+    description: "Generate images from text prompts (requires DALL-E 3)",
+    examples: ["A futuristic cityscape at sunset", "A robot coding at a desk", "Abstract watercolor mountains"],
+  },
 ];
+
+// Models that can generate images
+export const IMAGE_GENERATION_MODELS = new Set(["dall-e-3", "dall-e-2"]);
 
 export const MODELS = [
   // ── OpenAI ───────────────────────────────────────────────────────────────
@@ -50,6 +60,7 @@ export const MODELS = [
   { id: "gpt-4-turbo",        name: "GPT-4 Turbo",         provider: "openai", logoProvider: "openai" },
   { id: "o3-mini",            name: "o3 Mini (Reasoning)", provider: "openai", logoProvider: "openai" },
   { id: "o1",                 name: "o1 (Reasoning)",      provider: "openai", logoProvider: "openai" },
+  { id: "dall-e-3",           name: "DALL-E 3 (Image Gen)",provider: "openai", logoProvider: "openai", supportsImages: true },
 
   // ── Anthropic (direct) ───────────────────────────────────────────────────
   { id: "claude-opus-4-7",            name: "Claude Opus 4.7",     provider: "anthropic", logoProvider: "anthropic" },
@@ -154,6 +165,14 @@ const REASONING_POOR_MODES = STRUCTURED_MODES;
  */
 export function getCapabilityWarning(modelId, provider, modeId) {
   if (!modelId || !modeId) return null;
+
+  // Image Generation — only DALL-E models support this
+  if (modeId === "image_generation" && !IMAGE_GENERATION_MODELS.has(modelId)) {
+    return {
+      level: "error",
+      message: "Image generation requires DALL-E 3 (OpenAI). Switch to Provider: OpenAI → Model: DALL-E 3 to generate images.",
+    };
+  }
 
   // Web Search — only Perplexity supports real-time search
   if (modeId === "web_search" && provider !== "perplexity") {

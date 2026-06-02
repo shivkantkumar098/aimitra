@@ -21,7 +21,8 @@ AiMitra consolidates **30+ purpose-built AI tools** across 4 specialised workspa
 | ⚡ **Live Model List** | Model dropdown auto-fetches from provider API — always up to date |
 | 🧭 **Model Capability Warnings** | Warns when selected model may not support the active mode |
 | 💬 **Zero-token Local Replies** | Greetings and common messages answered instantly — no API call |
-| 🗜️ **Collapsible Sidebar** | Floating tab hides/shows sidebar to maximise workspace |
+| 🗜️ **Collapsible Sidebar** | Hamburger button in every panel header toggles sidebar on desktop & mobile |
+| 🎨 **Image Generation** | DALL-E 3 mode with smart popup warning for unsupported models |
 
 ---
 
@@ -38,6 +39,7 @@ AiMitra consolidates **30+ purpose-built AI tools** across 4 specialised workspa
 | Test Plan Generator | IEEE 829-compliant test plans |
 | DOM Locator Generator | XPath & CSS selectors for web automation |
 | Web Search | Current events, latest docs, live data queries *(real-time with Perplexity only)* |
+| Image Generation | Generate images from text prompts *(requires DALL-E 3 via OpenAI)* |
 
 ### ⚡ More Tools
 13 one-shot developer tools:
@@ -124,6 +126,7 @@ A yellow warning banner appears in the sidebar when the selected model may not h
 
 | Scenario | Warning |
 |----------|---------|
+| Image Generation + non-DALL-E model | **Blocking popup** — must switch to DALL-E 3 (OpenAI) |
 | Web Search + non-Perplexity model | No real-time search — training data only |
 | Reasoning model (o1, DeepSeek R1…) + JIRA/BDD/BA modes | May not follow structured output formats |
 | Small/lightweight model + complex structured tasks | May produce incomplete output |
@@ -287,7 +290,7 @@ aimitra/
 | Groq | **Free** | llama-3.3-70b, mixtral-8x7b, llama-3.1-8b |
 | Cerebras | **Free** | llama-3.3-70b, qwen-3-32b |
 | OpenRouter | **Free*** | llama-3.3-70b-free, 200+ models |
-| OpenAI | Paid | gpt-4o, gpt-4o-mini, o3-mini, o1 |
+| OpenAI | Paid | gpt-4o, gpt-4o-mini, o3-mini, o1, **dall-e-3** *(image gen)* |
 | Anthropic | Paid | claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5 |
 | Mistral AI | Paid | mistral-large, codestral, mistral-small |
 | DeepSeek | Paid | deepseek-v3, deepseek-r1 (thinking) |

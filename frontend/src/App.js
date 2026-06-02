@@ -8,6 +8,7 @@ import { useConfig } from "./hooks/useConfig";
 import { useChat } from "./hooks/useChat";
 import { useChatHistory } from "./hooks/useChatHistory";
 import { detectBetterMode } from "./utils/modeDetector";
+import { IMAGE_GENERATION_MODELS } from "./utils/capabilities";
 
 export default function App() {
   const { config, updateConfig, apiKey, setApiKey } = useConfig();
@@ -15,6 +16,7 @@ export default function App() {
   const [activeView, setActiveView] = useState("chat"); // "chat" | "jira" | "devtools" | "ba"
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showImageGenWarning, setShowImageGenWarning] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = config.theme || "dark";
@@ -99,7 +101,19 @@ export default function App() {
     else if (view === "ba") handleSetMode("ba_user_story");
   };
 
+  const toggleSidebar = () => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setSidebarCollapsed(c => !c);
+    } else {
+      setSidebarOpen(o => !o);
+    }
+  };
+
   const handleSend = (text) => {
+    if (activeMode === "image_generation" && !IMAGE_GENERATION_MODELS.has(config.model)) {
+      setShowImageGenWarning(true);
+      return;
+    }
     const suggestion = detectBetterMode(text, activeMode, activeView);
     send(text, activeMode, suggestion);
   };
@@ -169,7 +183,7 @@ export default function App() {
           setActiveMode={handleSetMode}
           setActiveView={handleSetView}
           onNewChat={handleNewChat}
-          onToggleSidebar={() => setSidebarOpen((o) => !o)}
+          onToggleSidebar={toggleSidebar}
         />
       ) : activeView === "devtools" ? (
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -177,7 +191,7 @@ export default function App() {
             config={effectiveConfig}
             activeMode={activeMode}
             setActiveMode={setActiveMode}
-            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+            onToggleSidebar={toggleSidebar}
           />
         </div>
       ) : activeView === "ba" ? (
@@ -186,7 +200,7 @@ export default function App() {
             config={effectiveConfig}
             activeMode={activeMode}
             setActiveMode={setActiveMode}
-            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+            onToggleSidebar={toggleSidebar}
           />
         </div>
       ) : (
@@ -194,8 +208,33 @@ export default function App() {
           <JiraPanel
             config={effectiveConfig}
             activeMode={activeMode}
-            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+            onToggleSidebar={toggleSidebar}
           />
+        </div>
+      )}
+
+      {/* Image Generation — model warning modal */}
+      {showImageGenWarning && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-primary)] rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-in">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-3xl">🎨</span>
+              <h3 className="text-base font-bold text-[var(--text-heading)]">Image Generation</h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-3">
+              Image generation requires <strong className="text-violet-300">DALL-E 3</strong> (OpenAI).
+              The currently selected model <strong className="text-white">{config.model || "unknown"}</strong> cannot generate images.
+            </p>
+            <p className="text-xs text-[var(--text-muted)] bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mb-4">
+              💡 In the sidebar: set <strong>Provider → OpenAI</strong> and <strong>Model → DALL-E 3 (Image Gen)</strong>, then resend your prompt.
+            </p>
+            <button
+              onClick={() => setShowImageGenWarning(false)}
+              className="w-full py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-medium transition-colors"
+            >
+              Got it
+            </button>
+          </div>
         </div>
       )}
     </div>

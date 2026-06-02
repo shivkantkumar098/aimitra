@@ -59,7 +59,7 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
-              className="md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
                 <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>

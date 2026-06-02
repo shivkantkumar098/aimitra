@@ -45,7 +45,7 @@ export default function DevPanel({ config, activeMode, setActiveMode, onToggleSi
         <div className="px-4 md:px-6 py-4 border-b border-gray-800/80 flex items-center gap-3 flex-shrink-0 animate-fade-in">
           <button
             onClick={onToggleSidebar}
-            className="md:hidden p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
