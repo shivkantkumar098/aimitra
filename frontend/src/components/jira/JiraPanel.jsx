@@ -131,7 +131,7 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
 
       {/* Tool content */}
       <div className={`flex-1 px-6 py-5 ${activeTab === "rovo" ? "overflow-hidden" : "overflow-y-auto"}`}>
-        <div className="max-w-3xl mx-auto h-full">
+        <div className={`max-w-3xl mx-auto ${activeTab === "rovo" ? "h-full" : ""}`}>
           {activeTab === "rovo" && (
             <AskRovo config={config} />
           )}
