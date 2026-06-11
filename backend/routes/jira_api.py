@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from services.jira_service import (
     add_comment,
+    check_rovo_available,
     create_ticket,
     get_projects,
     get_ticket,
@@ -75,7 +76,8 @@ async def connect(
     """
     try:
         user = await test_connection(x_jira_domain, x_jira_email, x_jira_token)
-        return {"connected": True, "user": user}
+        rovo_available = await check_rovo_available(x_jira_domain)
+        return {"connected": True, "user": user, "rovoAvailable": rovo_available}
     except Exception as e:
         _handle_jira_error(e)
 

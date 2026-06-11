@@ -11,7 +11,7 @@ import { useJiraTemplates } from "../../hooks/useJiraTemplates";
 import { useJiraAuth } from "../../hooks/useJiraAuth";
 
 const TABS = [
-  { id: "rovo",    label: "Ask Rovo",         icon: "🤖", desc: "AI assistant for JIRA & agile questions" },
+  { id: "rovo",    label: "Ask Jira AI",       icon: "🤖", desc: "AI assistant for JIRA & agile questions" },
   { id: "create",  label: "Ticket Creator",   icon: "🎫", desc: "Create any ticket from a template or sample" },
   { id: "bug",     label: "Bug Creator",      icon: "🐛", desc: "Create bugs in your company format" },
   { id: "jql",     label: "JQL Search",       icon: "🔍", desc: "Generate and run JQL queries" },
@@ -124,7 +124,9 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
             {tab.id === "plan"     && templates.testPlanFormat && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
             {tab.id === "validate" && templates.validatorFormat && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
             {tab.id === "create"   && templates.ticketFormat   && <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />}
-            {tab.id === "rovo"    && <span className="text-xs bg-blue-600/30 text-blue-300 px-1.5 py-0.5 rounded-full font-medium">AI</span>}
+            {tab.id === "rovo" && jiraAuth.connected && jiraAuth.rovoAvailable === false
+              ? <span className="text-xs bg-red-600/30 text-red-400 px-1.5 py-0.5 rounded-full font-medium">Unavailable</span>
+              : tab.id === "rovo" && <span className="text-xs bg-blue-600/30 text-blue-300 px-1.5 py-0.5 rounded-full font-medium">AI</span>}
           </button>
         ))}
       </div>
@@ -133,7 +135,7 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
       <div className={`flex-1 px-6 py-5 ${activeTab === "rovo" ? "overflow-hidden" : "overflow-y-auto"}`}>
         <div className={`max-w-3xl mx-auto ${activeTab === "rovo" ? "h-full" : ""}`}>
           {activeTab === "rovo" && (
-            <AskRovo config={config} />
+            <AskRovo config={config} rovoAvailable={jiraAuth.connected ? jiraAuth.rovoAvailable : null} />
           )}
           {activeTab === "create" && (
             <TicketCreator

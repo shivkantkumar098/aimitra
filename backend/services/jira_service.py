@@ -77,6 +77,28 @@ async def test_connection(domain: str, email: str, api_token: str) -> dict:
         }
 
 
+async def check_rovo_available(domain: str) -> bool:
+    """
+    Detects whether Atlassian Rovo (AI assistant) is available on this Jira instance.
+
+    The Rovo gateway endpoint only exists for Premium/Enterprise plans.
+    With a Basic-auth API token we always get 401 (needs OAuth) when Rovo IS licensed,
+    and 404 / connection error when it is NOT licensed — that's the signal we use.
+    """
+    domain_clean = domain.strip().rstrip("/")
+    if not domain_clean.startswith("http"):
+        domain_clean = f"https://{domain_clean}"
+    url = f"{domain_clean}/gateway/api/assist/chat/v1/chat"
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            response = await client.get(url)
+            # 401 = endpoint exists (Rovo licensed, just needs OAuth not API token)
+            # 405 = method not allowed but endpoint exists → also means licensed
+            return response.status_code in (401, 405)
+    except Exception:
+        return False
+
+
 async def get_ticket(domain: str, email: str, api_token: str, issue_key: str) -> dict:
     """
     Fetches a JIRA ticket by key (e.g. QA-123).

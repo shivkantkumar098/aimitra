@@ -49,7 +49,7 @@ const PROVIDER_HINTS = {
 };
 
 const JIRA_TOOLS = [
-  { id: "jira_rovo",     icon: "🤖", label: "Ask Rovo" },
+  { id: "jira_rovo",     icon: "🤖", label: "Ask Jira AI" },
   { id: "jira_create",   icon: "🎫", label: "Ticket Creator" },
   { id: "jira_bug",      icon: "🐛", label: "Bug Creator" },
   { id: "jira_jql",      icon: "🔍", label: "JQL Search" },

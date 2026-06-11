@@ -22,7 +22,7 @@ import axios from "axios";
 const STORAGE_KEY = "qa_jira_auth";
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-const defaultAuth = { domain: "", email: "", token: "", user: null, connected: false };
+const defaultAuth = { domain: "", email: "", token: "", user: null, connected: false, rovoAvailable: null };
 
 export function useJiraAuth() {
   const [jiraAuth, setJiraAuth] = useState(() => {
@@ -52,7 +52,7 @@ export function useJiraAuth() {
         {},
         { headers: { "x-jira-domain": domain, "x-jira-email": email, "x-jira-token": token } }
       );
-      const next = { domain, email, token, user: res.data.user, connected: true };
+      const next = { domain, email, token, user: res.data.user, connected: true, rovoAvailable: res.data.rovoAvailable ?? null };
       setJiraAuth(next);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
       return true;

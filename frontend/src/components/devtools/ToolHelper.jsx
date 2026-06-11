@@ -44,7 +44,7 @@ Your job is to guide users to the right tool for their task. Here is the complet
 - **A11y Checker** — Paste HTML → get WCAG accessibility violations with fixes
 
 ## 🔵 JIRA tab (requires Jira connection)
-- **Ask Rovo** — Ask questions about your Jira project using AI
+- **Ask Jira AI** — Ask questions about your Jira project using AI
 - **Ticket Creator** — Create a well-structured Jira ticket from a description
 - **Bug Creator** — Create a detailed bug report ticket with steps to reproduce
 - **JQL Search** — Search and load Jira tickets using JQL

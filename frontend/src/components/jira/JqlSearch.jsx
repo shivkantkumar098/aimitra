@@ -72,7 +72,7 @@ Always respond in this exact format:
           🔍 Describe what you want to find
         </label>
         <p className="text-xs text-gray-500 mb-3">
-          Write in plain English — Rovo will generate the JQL for you.
+          Write in plain English — Jira AI will generate the JQL for you.
         </p>
         <textarea
           value={naturalQuery}

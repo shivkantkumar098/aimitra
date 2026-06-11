@@ -156,7 +156,7 @@ export default function TicketCreator({ config, template, onSaveTemplate, getHea
 
   const handleGenerate = async () => {
     if (!description.trim() || !activeFormat) return;
-    const systemPrompt = `You are Rovo, Atlassian's AI assistant. Create a professional, complete JIRA ticket following the exact format below.
+    const systemPrompt = `You are a senior JIRA AI assistant. Create a professional, complete JIRA ticket following the exact format below.
 
 TICKET FORMAT:
 ---
@@ -279,7 +279,7 @@ Rules:
               🎫 Load Sample Ticket
             </p>
             <p className="text-xs text-gray-400 mb-3">
-              Enter a ticket number and Rovo will mimic its structure and style when creating new tickets.
+              Enter a ticket number and Jira AI will mimic its structure and style when creating new tickets.
             </p>
             <div className="flex gap-2">
               <input
@@ -354,7 +354,7 @@ Rules:
                 Generating...
               </>
             ) : (
-              "✨ Ask Rovo to Create"
+              "✨ Ask Jira AI to Create"
             )}
           </button>
           {result && (
