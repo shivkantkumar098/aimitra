@@ -1,9 +1,41 @@
+/**
+ * modeDetector — analyses user input and suggests a better capability mode or model.
+ *
+ * Called by App.handleSend() before dispatching a message.
+ * When a suggestion is returned, useChat injects a suggestion banner into the
+ * message list so the user can switch with one click — it does NOT change the
+ * mode automatically.
+ *
+ * Detection rules (in priority order):
+ *   1. Stack traces / error strings    → "Code Debugging" mode (any active mode)
+ *   2. Live-data keywords              → "Web Search" mode (from text_generation)
+ *   3. BDD / Gherkin keywords          → "BDD Generator" devtool
+ *   4. API testing keywords            → "API Test Generator" devtool
+ *   5. Test plan keywords              → "Test Plan Generator" mode
+ *   6. DOM selector keywords           → "DOM Locator Generator" mode
+ *   7. Test case keywords              → "Test Case Generator" mode
+ *   8. Reasoning / math keywords       → suggest DeepSeek R1 or o3-mini model
+ *   9. Code generation keywords        → suggest Claude Sonnet or GPT-4o model
+ *  10. Long document keywords          → suggest Claude Sonnet model
+ *  11. Fast / simple keywords          → suggest Groq (Llama 3.3 70B) model
+ *  12. Off-topic in specialized modes  → suggest "General Chat" mode
+ *
+ * Returns:
+ *   { type: "mode"|"model", mode, view, icon, label, hint } — suggestion object
+ *   null — no suggestion needed
+ */
+
+/** Returns true if text contains any of the provided word/phrase fragments. */
 const has = (text, ...words) => words.some(w => text.includes(w));
 
 const TEST_KEYWORDS = ["test", "assert", "expect", "selenium", "playwright", "cypress", "webdriver", "bdd", "gherkin", "locator", "xpath", "selector", "scenario", "spec", "automation", "e2e"];
 const CODE_KEYWORDS = ["function", "class", "variable", "code", "script", "import", "export", "bug", "error", "exception", "fix", "debug", "compile", "syntax", "api", "database", "server"];
 const GENERAL_QUESTION = (t) => has(t, "what is", "what are", "who is", "why does", "why is", "why are", "explain ", "how does", "how do", "tell me", "difference between", "define ", "meaning of", "can you help", "i need help");
 
+/**
+ * Returns true if the text looks like a stack trace or runtime error output.
+ * Checks for common Java, Python, JavaScript, Go, and Rust error patterns.
+ */
 const isStackTrace = (t) =>
   has(t,
     "exception in thread", "nullpointerexception", "stackoverflowexception",
@@ -16,6 +48,14 @@ const isStackTrace = (t) =>
     "unhandled exception", "error: cannot", "panic:", "runtime error"
   ) || /\bat\s+[\w$.]+\s*\([\w$.]+\.(?:java|kt|scala|cs|py|js|ts):\d+\)/i.test(t);
 
+/**
+ * Analyses the user's message and the currently active mode, then returns
+ * a suggestion object if a better mode or model exists for the request.
+ *
+ * @param {string} text       - the raw user input (before sending)
+ * @param {string} activeMode - the current capability mode ID
+ * @returns {{ type: "mode"|"model", mode?: string, view?: string, icon: string, label: string, hint?: string } | null}
+ */
 export function detectBetterMode(text, activeMode) {
   const t = text.toLowerCase();
 

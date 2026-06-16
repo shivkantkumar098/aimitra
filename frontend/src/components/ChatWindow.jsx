@@ -1,9 +1,30 @@
+/**
+ * ChatWindow — main chat panel component.
+ *
+ * Renders the scrollable message list, typing indicator, welcome screen,
+ * and the input box. Also handles mode-specific inline UI:
+ *   - DOM Locator mode: replaces the message list with DomLocatorGenerator
+ *   - Web Search mode: shows a banner (green for Perplexity, amber warning for others)
+ *
+ * Props:
+ *   messages        — array of message objects from useChat
+ *   isLoading       — true while waiting for a streaming or non-streaming response
+ *   error           — error string to display above the input, or null
+ *   onSend          — called with the user's text when they submit the input
+ *   activeMode      — current capability mode ID (controls inline panels and banners)
+ *   setActiveMode   — callback to switch capability mode
+ *   setActiveView   — callback to switch the top-level panel (chat/devtools/jira/ba)
+ *   onNewChat       — called when the "New Chat" button is clicked
+ *   onToggleSidebar — called when the hamburger icon is clicked
+ *   config          — full config object (provider, model, etc.) passed down to devtools
+ */
 import { useEffect, useRef } from "react";
 import Message from "./Message";
 import TypingIndicator from "./TypingIndicator";
 import WelcomeScreen from "./WelcomeScreen";
 import ChatInput from "./ChatInput";
 import { CAPABILITIES } from "../utils/capabilities";
+import DomLocatorGenerator from "./devtools/DomLocatorGenerator";
 
 export default function ChatWindow({
   messages,
@@ -66,6 +87,15 @@ export default function ChatWindow({
         </button>
       </header>
 
+      {/* DOM Locator — full tool UI replaces chat body */}
+      {activeMode === "dom_locator" && (
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="max-w-3xl mx-auto">
+            <DomLocatorGenerator config={config} />
+          </div>
+        </div>
+      )}
+
       {/* Web Search banner */}
       {activeMode === "web_search" && (
         config.provider === "perplexity" ? (
@@ -97,44 +127,46 @@ export default function ChatWindow({
         )
       )}
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {messages.length === 0 ? (
-          <WelcomeScreen
-            activeMode={activeMode}
-            setActiveMode={setActiveMode}
-            onExampleClick={onSend}
-          />
-        ) : (
-          <div className="max-w-3xl mx-auto space-y-5">
-            {messages.map((msg) => (
-              <Message key={msg.id} message={msg} setActiveMode={setActiveMode} setActiveView={setActiveView} />
-            ))}
-            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <TypingIndicator />
+      {/* Messages + input — hidden when DOM Locator tool is active */}
+      {activeMode !== "dom_locator" && (
+        <>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            {messages.length === 0 ? (
+              <WelcomeScreen
+                activeMode={activeMode}
+                setActiveMode={setActiveMode}
+                onExampleClick={onSend}
+              />
+            ) : (
+              <div className="max-w-3xl mx-auto space-y-5">
+                {messages.map((msg) => (
+                  <Message key={msg.id} message={msg} setActiveMode={setActiveMode} setActiveView={setActiveView} />
+                ))}
+                {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+                  <TypingIndicator />
+                )}
+                <div ref={bottomRef} />
+              </div>
             )}
-            <div ref={bottomRef} />
           </div>
-        )}
-      </div>
 
-      {/* Error banner */}
-      {error && (
-        <div className="mx-6 mb-2 px-4 py-2.5 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-sm flex items-center gap-2 animate-slide-down">
-          <span>⚠</span>
-          <span>{error}</span>
-        </div>
+          {error && (
+            <div className="mx-6 mb-2 px-4 py-2.5 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-sm flex items-center gap-2 animate-slide-down">
+              <span>⚠</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="max-w-3xl mx-auto w-full">
+            <ChatInput
+              onSend={onSend}
+              isLoading={isLoading}
+              activeMode={activeMode}
+              setActiveMode={setActiveMode}
+            />
+          </div>
+        </>
       )}
-
-      {/* Input */}
-      <div className="max-w-3xl mx-auto w-full">
-        <ChatInput
-          onSend={onSend}
-          isLoading={isLoading}
-          activeMode={activeMode}
-          setActiveMode={setActiveMode}
-        />
-      </div>
     </main>
   );
 }

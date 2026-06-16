@@ -34,11 +34,27 @@ MAX_MSG_CHARS = 2000
 
 
 class OpenAICompatProvider:
+    """
+    Generic adapter for any OpenAI-compatible chat completions API.
+
+    Usage (from chat.py):
+      svc = OpenAICompatProvider("https://api.openai.com/v1", extra_headers={...})
+      text = await svc.generate_response(api_key, model, system_prompt, user_message, ...)
+
+    A new instance is created per request in _pick_service(); there is no shared state.
+    """
+
     def __init__(self, base_url: str, extra_headers: dict | None = None):
+        """
+        @param base_url      - provider API base URL (e.g. "https://api.openai.com/v1")
+        @param extra_headers - optional additional headers required by the provider
+                               (e.g. HTTP-Referer and X-Title for OpenRouter)
+        """
         self.url = base_url.rstrip("/") + "/chat/completions"
         self.extra_headers = extra_headers or {}
 
     def _headers(self, api_key: str) -> dict:
+        """Returns the Authorization header merged with any provider-specific extra headers."""
         return {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
@@ -53,6 +69,13 @@ class OpenAICompatProvider:
         image_base64: str | None = None,
         image_mime_type: str = "image/png",
     ) -> list[dict]:
+        """
+        Builds the OpenAI-format messages array.
+
+        Structure: [system, ...history (last 6, each truncated to 2000 chars), user]
+        When image_base64 is provided, the user message uses a content array with
+        an image_url block (data URI) followed by a text block (vision format).
+        """
         messages = [{"role": "system", "content": system_prompt}]
         if history:
             for msg in history[-MAX_HISTORY:]:
@@ -80,6 +103,13 @@ class OpenAICompatProvider:
         image_base64: str | None = None,
         image_mime_type: str = "image/png",
     ) -> str:
+        """
+        Non-streaming request to the chat/completions endpoint.
+
+        Retries up to 3 times on 429 (rate limit), respecting Retry-After header.
+        Extracts and returns choices[0].message.content on success.
+        Raises ValueError if the response shape is unexpected.
+        """
         body = {
             "model": model,
             "messages": self._build_messages(system_prompt, user_message, history, image_base64, image_mime_type),
@@ -116,6 +146,14 @@ class OpenAICompatProvider:
         image_base64: str | None = None,
         image_mime_type: str = "image/png",
     ) -> AsyncGenerator[str, None]:
+        """
+        Streaming request using SSE (stream: true).
+
+        Retries with backoff 10s/20s/40s on 429.
+        Yields text tokens from choices[0].delta.content in each SSE chunk.
+        Skips chunks where delta.content is empty (role/finish_reason lines).
+        Yields a visible retry message to the frontend when rate-limited.
+        """
         body = {
             "model": model,
             "messages": self._build_messages(system_prompt, user_message, history, image_base64, image_mime_type),

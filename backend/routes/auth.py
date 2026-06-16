@@ -1,4 +1,23 @@
-"""Auth routes — signup / login / logout / me via Supabase Auth."""
+"""
+Auth routes — user authentication via Supabase Auth.
+
+Endpoints:
+  POST /api/auth/signup  — register a new user
+  POST /api/auth/login   — sign in and receive JWT tokens
+  POST /api/auth/logout  — invalidate the current session
+  GET  /api/auth/me      — validate a Bearer token and return the user
+
+Setup:
+  Set SUPABASE_URL and SUPABASE_ANON_KEY in backend/.env.
+  If not set, all auth endpoints return HTTP 503.
+
+Token flow:
+  login → returns { access_token, refresh_token }
+  Subsequent requests send: Authorization: Bearer {access_token}
+  /me validates the token and returns { id, email }
+
+Note: Email confirmation may be required after signup depending on Supabase project settings.
+"""
 
 import os
 
@@ -11,6 +30,12 @@ _client = None
 
 
 def _get_client():
+    """
+    Lazy-initialises and returns the Supabase client singleton.
+
+    Raises HTTP 503 if SUPABASE_URL or SUPABASE_ANON_KEY env vars are missing,
+    giving a clear message instead of an ImportError or AttributeError at call time.
+    """
     global _client
     if _client is not None:
         return _client
@@ -33,6 +58,14 @@ class AuthRequest(BaseModel):
 
 @router.post("/signup")
 async def signup(body: AuthRequest):
+    """
+    POST /api/auth/signup — registers a new user with email + password.
+
+    Returns access/refresh tokens if email confirmation is not required.
+    Returns email_confirmation_required: true when Supabase needs email verification
+    before the session is active (tokens will be null in that case).
+    Raises 409 if the email is already registered.
+    """
     client = _get_client()
     try:
         res = client.auth.sign_up({"email": body.email, "password": body.password})
@@ -56,6 +89,12 @@ async def signup(body: AuthRequest):
 
 @router.post("/login")
 async def login(body: AuthRequest):
+    """
+    POST /api/auth/login — authenticates a user and returns JWT tokens.
+
+    Returns { access_token, refresh_token, user: { id, email } } on success.
+    Raises 401 for invalid credentials or unconfirmed email.
+    """
     client = _get_client()
     try:
         res = client.auth.sign_in_with_password(
@@ -80,6 +119,12 @@ async def login(body: AuthRequest):
 
 @router.post("/logout")
 async def logout(authorization: str = Header(default=None)):
+    """
+    POST /api/auth/logout — invalidates the current Supabase session.
+
+    Always returns { ok: true } — even if no session exists or sign_out fails,
+    so the frontend can safely clear local token state.
+    """
     client = _get_client()
     try:
         client.auth.sign_out()
@@ -90,6 +135,13 @@ async def logout(authorization: str = Header(default=None)):
 
 @router.get("/me")
 async def me(authorization: str = Header(default=None)):
+    """
+    GET /api/auth/me — validates a Bearer token and returns the current user.
+
+    Expects: Authorization: Bearer {access_token}
+    Returns { id, email } on success.
+    Raises 401 if the header is missing, malformed, or the token has expired.
+    """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "No token provided.")
     token = authorization[7:]

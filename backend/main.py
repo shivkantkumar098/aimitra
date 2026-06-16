@@ -1,4 +1,30 @@
-"""QA Assistant — FastAPI entry point."""
+"""
+QA Assistant — FastAPI application entry point.
+
+This file:
+  1. Loads environment variables from backend/.env via python-dotenv
+  2. Creates the FastAPI app instance
+  3. Configures CORS (allow all origins — tighten for production)
+  4. Registers all API routers
+  5. Mounts the React SPA static files (built by build.sh → backend/static/)
+  6. Provides a spa_fallback route so React Router handles deep links correctly
+
+Running in development:
+  cd backend && uvicorn main:app --reload --port 8000
+
+Running in production (after build.sh):
+  cd backend && python main.py
+  The FastAPI server serves both the API and the React frontend on port 8000.
+
+Router summary:
+  health_router   — GET /health, GET /api/models (legacy), GET /api/capabilities
+  analyzer_router — POST /api/analyze-url
+  download_router — GET /api/download/extension
+  chat_router     — POST /api/chat, POST /api/chat/stream
+  jira_router     — /api/jira/*
+  models_router   — GET /api/models (live provider fetch)
+  report_router   — POST /api/report-issue, GET /api/issues, GET /api/issues/download
+"""
 
 import os
 
@@ -47,6 +73,12 @@ if os.path.exists(_STATIC):
 
     @app.get("/{full_path:path}")
     async def spa_fallback(full_path: str):
+        """
+        Catch-all GET route for SPA (React Router) support.
+        If the path matches a real static file (e.g. /favicon.ico), serve it.
+        Otherwise serve index.html so React Router handles the route client-side.
+        Must be registered AFTER all API routers to avoid shadowing them.
+        """
         file_path = os.path.join(_STATIC, full_path)
         if full_path and os.path.isfile(file_path):
             return FileResponse(file_path)

@@ -1,3 +1,29 @@
+/**
+ * capabilities.js — single source of truth for capability modes and model catalogue.
+ *
+ * Exports:
+ *   CAPABILITIES           — array of 7 chat mode objects (id, label, icon, description, examples)
+ *                            Used by Sidebar for the mode list and WelcomeScreen for example prompts.
+ *
+ *   IMAGE_GENERATION_MODELS— Set of model IDs that support image generation (DALL-E only).
+ *                            Checked in App.handleSend() before allowing image_generation mode.
+ *
+ *   MODELS                 — full model catalogue (~60 models across 13 providers).
+ *                            Each entry: { id, name, provider, logoProvider }.
+ *                            Used as static fallback by useModels when live fetch fails.
+ *                            When adding a new model, also add its ID to the backend:
+ *                              - Groq models → GROQ_MODELS in backend/routes/chat.py
+ *                              - Anthropic models → ANTHROPIC_MODELS in backend/routes/chat.py
+ *
+ *   REASONING_MODELS       — Set of chain-of-thought reasoning model IDs.
+ *   SMALL_MODELS           — Set of lightweight model IDs (may struggle with complex tasks).
+ *   STRUCTURED_MODES       — Set of mode IDs that require structured output.
+ *
+ *   getCapabilityWarning(modelId, provider, modeId)
+ *                          — returns { level: "warning"|"error", message } or null.
+ *                            Called by Sidebar whenever the model or mode changes
+ *                            to show compatibility warnings in the UI.
+ */
 export const CAPABILITIES = [
   {
     id: "text_generation",
@@ -9,7 +35,7 @@ export const CAPABILITIES = [
   {
     id: "dom_locator",
     label: "DOM Locator Generator",
-    icon: "🔍",
+    icon: "🎯",
     description: "Generate XPath and CSS selectors for web elements",
     examples: ["Login button XPath", "CSS for nav items", "Input field selector"],
   },

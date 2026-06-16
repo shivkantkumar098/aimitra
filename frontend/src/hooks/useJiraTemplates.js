@@ -1,3 +1,24 @@
+/**
+ * useJiraTemplates — manages user-customisable output format templates for JIRA tools.
+ *
+ * Templates are stored in localStorage under "qa_jira_templates".
+ * Each key maps to a user-edited format string; an empty string means "use the default".
+ *
+ * Template keys:
+ *   bugFormat      — used by BugCreator to structure bug reports
+ *   commentFormat  — used by CommentGenerator for post-validation comments
+ *   testPlanFormat — used by TestPlanReviewer for the review report
+ *   validatorFormat— used by TicketValidator for validation reports
+ *   ticketFormat   — used by TicketCreator for general ticket structure
+ *
+ * Default templates are exported as named constants (DEFAULT_BUG_FORMAT, etc.)
+ * so tool components can display them as placeholders.
+ *
+ * Exposed API:
+ *   templates          — { bugFormat, commentFormat, testPlanFormat, validatorFormat, ticketFormat }
+ *   saveTemplate(key, value) — persists a template change to localStorage
+ *   clearTemplate(key)       — resets a template to empty (falls back to default)
+ */
 import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "qa_jira_templates";
@@ -106,12 +127,20 @@ export function useJiraTemplates() {
   const [templates, setTemplates] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
+      // Merge with defaults so new keys added in future releases don't cause missing fields
       return saved ? { ...defaultTemplates, ...JSON.parse(saved) } : defaultTemplates;
     } catch {
       return defaultTemplates;
     }
   });
 
+  /**
+   * Saves a single template value to state and localStorage.
+   * Other template keys are untouched.
+   *
+   * @param {string} key   - one of: bugFormat | commentFormat | testPlanFormat | validatorFormat | ticketFormat
+   * @param {string} value - the format string to save
+   */
   const saveTemplate = useCallback((key, value) => {
     setTemplates((prev) => {
       const next = { ...prev, [key]: value };
@@ -120,6 +149,11 @@ export function useJiraTemplates() {
     });
   }, []);
 
+  /**
+   * Resets a template to empty string, causing tools to fall back to the default.
+   *
+   * @param {string} key - the template key to clear
+   */
   const clearTemplate = useCallback((key) => {
     saveTemplate(key, "");
   }, [saveTemplate]);

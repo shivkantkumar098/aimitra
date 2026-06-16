@@ -1,4 +1,23 @@
-"""URL analyzer — fetches any webpage and extracts interactive elements for test generation."""
+"""
+URL analyzer — fetches any webpage and extracts interactive elements for test generation.
+
+Endpoint:
+  POST /api/analyze-url — fetches the URL, parses HTML, returns structured element data.
+
+Used by:
+  - DomLocatorGenerator (frontend) to pre-populate CSS/XPath fields
+  - DevTools test generators to understand page structure before generating tests
+
+How it works:
+  1. Fetches the page with httpx (follows redirects, allows self-signed certs for localhost)
+  2. Strips script/style/noscript/svg tags from the DOM
+  3. Extracts: title, headings, forms, inputs, buttons, links
+  4. For each element, generates CSS selector and XPath via _css() and _xpath()
+  5. Detects JS-heavy SPAs (React #root, Vue #app, Next.js #__next) and flags them
+
+Note: For JS-rendered SPAs where content loads after page load, the Chrome extension's
+content.js is a better tool since it runs in the live browser DOM.
+"""
 
 import re
 from urllib.parse import urljoin
@@ -19,6 +38,17 @@ class AnalyzeRequest(BaseModel):
 # ── Selector helpers ──────────────────────────────────────────────────────────
 
 def _css(tag: Tag) -> str:
+    """
+    Generates the most stable CSS selector for a BeautifulSoup Tag.
+
+    Priority order (most reliable → least):
+      1. #id           — unique, fastest
+      2. [data-testid] — test-specific attribute, stable across refactors
+      3. [data-cy]     — Cypress-style test attribute
+      4. [name]        — form field name
+      5. tag.class1.class2 — skips short utility classes (e.g. "mb-4")
+      6. structural path anchored to nearest #id ancestor
+    """
     if tag.get("id"):
         return f"#{tag['id']}"
     if tag.get("data-testid"):
@@ -51,6 +81,13 @@ def _css(tag: Tag) -> str:
 
 
 def _xpath(tag: Tag) -> str:
+    """
+    Generates an absolute XPath for a BeautifulSoup Tag.
+
+    If the element has an `id`, returns the short //*[@id="..."] form.
+    Otherwise builds a full positional path from the document root,
+    using [n] index when the element has siblings of the same tag name.
+    """
     if tag.get("id"):
         return f'//*[@id="{tag["id"]}"]'
     parts = []
@@ -65,6 +102,13 @@ def _xpath(tag: Tag) -> str:
 
 
 def _info(tag: Tag, base_url: str) -> dict:
+    """
+    Extracts all useful metadata from a Tag for the frontend display and test generation.
+
+    Returns a dict with: tag, id, name, type, placeholder, text (first 60 chars),
+    ariaLabel, role, href (resolved to absolute URL), cssSelector, xpath.
+    Relative hrefs are resolved against base_url using urljoin.
+    """
     text = tag.get_text(" ", strip=True)[:60] or None
     href = tag.get("href")
     if href and not href.startswith(("http", "mailto", "tel", "javascript", "#", "data:")):
@@ -88,6 +132,26 @@ def _info(tag: Tag, base_url: str) -> dict:
 
 @router.post("/api/analyze-url")
 async def analyze_url(body: AnalyzeRequest):
+    """
+    POST /api/analyze-url — fetches a URL and returns structured element data.
+
+    Request body: { url: string, timeout: int (default 20s) }
+
+    Response:
+      url        — final URL after redirects
+      title      — page <title> text
+      headings   — first 6 h1/h2/h3 texts
+      forms      — up to 6 forms, each with { id, action, method, fields[] }
+      inputs     — up to 25 non-hidden form fields
+      buttons    — up to 25 submit/button elements
+      links      — up to 20 non-empty <a> elements
+      is_js_heavy— true when page is likely a JS SPA (React/Vue/Next root div detected)
+
+    Error responses:
+      408 — page timed out
+      502 — connection refused
+      4xx/5xx — pass-through from the target server
+    """
     url = body.url.strip()
     if not url.startswith(("http://", "https://")):
         url = "http://" + url

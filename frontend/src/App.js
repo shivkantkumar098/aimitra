@@ -1,3 +1,25 @@
+/**
+ * App — root component and application shell.
+ *
+ * Owns the top-level layout: Sidebar (left) + active panel (right).
+ * Manages which panel is visible (chat / devtools / jira / ba) and
+ * routes all user actions (new chat, mode change, send message) to
+ * the correct hook or child component.
+ *
+ * State overview:
+ *   activeMode      — current capability mode ID (e.g. "text_generation", "debug")
+ *   activeView      — which panel is shown ("chat" | "jira" | "devtools" | "ba")
+ *   sidebarOpen     — mobile overlay sidebar visible
+ *   sidebarCollapsed— desktop sidebar hidden (collapsed to edge)
+ *
+ * Keyboard shortcuts (global):
+ *   Ctrl+K — new chat
+ *   Ctrl+/ — toggle sidebar
+ *   Ctrl+1 — chat panel
+ *   Ctrl+2 — devtools panel
+ *   Ctrl+3 — jira panel
+ *   Ctrl+4 — ba panel
+ */
 import { useState, useRef, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
@@ -70,7 +92,13 @@ export default function App() {
     upsertConversation(currentConvIdRef.current, messages, meta);
   }, [messages, isLoading]); // upsertConversation is stable (useCallback); config values read via closure are intentional
 
-  // Save current conversation then start fresh — called on capability/view change
+  /**
+   * Saves the current conversation to history then clears the chat window.
+   * Called before switching capability mode or panel so work is not lost.
+   * Skips save if there are no real user messages (e.g. only suggestion banners).
+   *
+   * @param {string} modeLabel - mode ID to record on the saved conversation entry
+   */
   const saveAndReset = (modeLabel) => {
     const saveableMessages = messages.filter(m => m.role !== "suggestion");
     const hasRealContent = saveableMessages.some(m => m.role === "user");
@@ -88,11 +116,23 @@ export default function App() {
     }
   };
 
+  /**
+   * Switches the active capability mode.
+   * Saves the current conversation first if there is unsaved content.
+   *
+   * @param {string} newMode - the capability mode ID to switch to
+   */
   const handleSetMode = (newMode) => {
     if (newMode !== activeMode) saveAndReset(activeMode);
     setActiveMode(newMode);
   };
 
+  /**
+   * Switches the visible panel (chat / devtools / jira / ba) and automatically
+   * sets the default capability mode for that panel.
+   *
+   * @param {"chat"|"devtools"|"jira"|"ba"} view - target panel
+   */
   const handleSetView = (view) => {
     setActiveView(view);
     if (view === "jira") handleSetMode("jira_bug");
@@ -101,6 +141,11 @@ export default function App() {
     else if (view === "ba") handleSetMode("ba_user_story");
   };
 
+  /**
+   * Toggles sidebar visibility.
+   * On desktop (≥768px): collapses/expands the sidebar.
+   * On mobile: shows/hides the full-screen overlay sidebar.
+   */
   const toggleSidebar = () => {
     if (window.matchMedia("(min-width: 768px)").matches) {
       setSidebarCollapsed(c => !c);
@@ -109,6 +154,14 @@ export default function App() {
     }
   };
 
+  /**
+   * Handles message submission from ChatInput.
+   * Guards against image generation with a non-image model,
+   * runs mode detection to surface better-mode suggestions,
+   * then delegates to useChat.send().
+   *
+   * @param {string} text - the user's input text
+   */
   const handleSend = (text) => {
     if (activeMode === "image_generation" && !IMAGE_GENERATION_MODELS.has(config.model)) {
       setShowImageGenWarning(true);
@@ -118,11 +171,18 @@ export default function App() {
     send(text, activeMode, suggestion);
   };
 
+  /** Clears the conversation ID ref and resets the chat window for a fresh start. */
   const handleNewChat = () => {
     currentConvIdRef.current = null;
     newChat();
   };
 
+  /**
+   * Restores a saved conversation from history into the chat window.
+   * Sets the conversation ID so subsequent messages auto-update the same entry.
+   *
+   * @param {{ id: string, messages: Array, mode: string }} conversation - the history entry to restore
+   */
   const handleLoadConversation = (conversation) => {
     currentConvIdRef.current = conversation.id;
     loadMessages(conversation.messages);

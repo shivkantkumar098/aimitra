@@ -1,4 +1,23 @@
-"""Issue report route — appends reports to Excel, uploads screenshots to Supabase Storage."""
+"""
+Issue report route — appends user-submitted bug reports to an Excel file.
+
+Endpoints:
+  POST /api/report-issue    — submit a bug report (multipart form)
+  GET  /api/issues          — list all recorded issues as JSON
+  GET  /api/issues/download — download the issues.xlsx file
+
+Storage:
+  Reports are appended to backend/issues.xlsx (created on first report).
+  Screenshots are uploaded to Supabase Storage bucket "issue-screenshots".
+  If Supabase is not configured, screenshot_url is saved as "upload-failed".
+
+Excel columns:
+  # | Timestamp (UTC) | Reporter Email | Page / Context | Description | Screenshot URL
+
+Setup for screenshot uploads:
+  Set SUPABASE_URL and SUPABASE_SERVICE_KEY (or SUPABASE_ANON_KEY) in backend/.env.
+  Create a public storage bucket named "issue-screenshots" in your Supabase project.
+"""
 
 import os
 import uuid
@@ -16,6 +35,11 @@ BUCKET = "issue-screenshots"
 
 
 def _supabase():
+    """
+    Creates and returns a Supabase client for storage uploads.
+    Returns None (gracefully) if env vars are not set — reports still save to Excel.
+    Prefers SUPABASE_SERVICE_KEY over SUPABASE_ANON_KEY so uploads bypass RLS.
+    """
     url = os.getenv("SUPABASE_URL", "").strip()
     # Use service role key for storage uploads (bypasses RLS); fall back to anon key
     key = os.getenv("SUPABASE_SERVICE_KEY", "") or os.getenv("SUPABASE_ANON_KEY", "")
@@ -46,6 +70,11 @@ def _upload_screenshot(data: bytes, ext: str) -> str | None:
 
 
 def _get_workbook():
+    """
+    Opens the existing issues.xlsx workbook or creates a new one with headers.
+    Column widths are set on creation so the file is readable without manual adjustment.
+    Returns (workbook, worksheet) tuple.
+    """
     if os.path.exists(ISSUES_FILE):
         wb = openpyxl.load_workbook(ISSUES_FILE)
         ws = wb.active
@@ -69,6 +98,20 @@ async def report_issue(
     page: str = Form(""),
     screenshot: UploadFile = File(None),
 ):
+    """
+    POST /api/report-issue — records a bug report.
+
+    Multipart form fields:
+      description    (required) — bug description text
+      reporter_email (optional) — reporter's email address
+      page           (optional) — page URL or feature context
+      screenshot     (optional) — image file (.png, .jpg)
+
+    Flow:
+      1. If a screenshot is attached, uploads it to Supabase Storage
+      2. Appends a row to issues.xlsx
+      3. Returns { status: "ok", message: "..." } on success
+    """
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     screenshot_url = "—"
 
@@ -93,6 +136,11 @@ async def report_issue(
 
 @router.get("/api/issues")
 async def list_issues():
+    """
+    GET /api/issues — returns all issue records as JSON.
+    Used by the IssuesViewer devtool to display the issues table.
+    Returns { issues: [...], total: n } or empty list if no file exists yet.
+    """
     if not os.path.exists(ISSUES_FILE):
         return JSONResponse({"issues": [], "total": 0})
     try:
@@ -110,6 +158,10 @@ async def list_issues():
 
 @router.get("/api/issues/download")
 async def download_issues():
+    """
+    GET /api/issues/download — serves the issues.xlsx file as a download.
+    Returns 404 if no issues have been reported yet.
+    """
     if not os.path.exists(ISSUES_FILE):
         return JSONResponse(status_code=404, content={"error": "No issues file found yet."})
     return FileResponse(
