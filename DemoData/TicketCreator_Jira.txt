@@ -1,0 +1,39 @@
+Summary: User Login with Email and Password
+Type: Story
+
+
+User Story:
+As a registered user, I want to log in using my email and password so that I can securely access my account.
+
+Acceptance Criteria:
+- [ ] Given a registered user, when valid credentials are entered, then the user should be redirected to the dashboard.
+- [ ] Given an invalid password, when login is attempted, then an error message should be displayed.
+- [ ] Given empty mandatory fields, when login is attempted, then validation messages should be shown.
+- [ ] Given an inactive account, when login is attempted, then access should be denied.
+
+Definition of Done:
+- [ ] Code reviewed
+- [ ] Unit tests written
+- [ ] API tests added
+- [ ] Documentation updated
+
+
+
+------------2ND--------------------
+Summary: Add Product to Shopping Cart
+Type: Story
+
+
+User Story:
+As a customer, I want to add products to my cart so that I can purchase multiple items together.
+
+Acceptance Criteria:
+- [ ] Given a product is available, when the user clicks "Add to Cart", then the item should be added successfully.
+- [ ] Given the same product already exists in the cart, when added again, then the quantity should increase.
+- [ ] Given the product is out of stock, when adding to cart, then an appropriate message should be displayed.
+
+Definition of Done:
+- [ ] Code reviewed
+- [ ] Unit tests written
+- [ ] Cart API tested
+- [ ] Documentation updated

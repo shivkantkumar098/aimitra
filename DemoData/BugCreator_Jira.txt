@@ -1,0 +1,36 @@
+Summary: User unable to login with valid credentials
+Type: Bug
+Priority: High
+Severity: Critical
+
+Environment:
+- Application: Web Portal
+- Environment: QA
+- Browser: Chrome 137
+- OS: Windows 11
+
+Description:
+Users are unable to login using valid credentials. An "Invalid username or password" message is displayed even though the credentials are correct.
+
+Preconditions:
+- User account exists and is active.
+
+Steps to Reproduce:
+1. Navigate to the login page.
+2. Enter valid username and password.
+3. Click on Login.
+
+Expected Result:
+User should be successfully logged in and redirected to the dashboard.
+
+Actual Result:
+An error message "Invalid username or password" is displayed.
+
+Attachments:
+- Screenshot attached
+
+Definition of Done:
+- [ ] Root cause identified
+- [ ] Fix implemented
+- [ ] Unit tests added
+- [ ] Regression testing completed

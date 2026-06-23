@@ -175,10 +175,6 @@ export function useChat(config) {
     [messages, isLoading, config]
   );
 
-  const injectMessage = useCallback((role, content, meta = {}) => {
-    setMessages(prev => [...prev, { ...addMessage(role, content), ...meta }]);
-  }, []);
-
   /** Clears all messages and resets loading/error state. */
   const newChat = useCallback(() => {
     setMessages([]);
@@ -199,5 +195,5 @@ export function useChat(config) {
     setIsLoading(false);
   }, []);
 
-  return { messages, isLoading, error, send, newChat, loadMessages, injectMessage };
+  return { messages, isLoading, error, send, newChat, loadMessages };
 }
