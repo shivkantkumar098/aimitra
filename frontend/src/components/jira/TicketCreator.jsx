@@ -2,7 +2,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAiQuery } from "../../hooks/useAiQuery";
-import { fetchTicket, createTicket, fetchProjects } from "../../services/jiraService";
+import { fetchTicket, createTicket, fetchProjects, fetchIssueTypes } from "../../services/jiraService";
 import TemplatePrompt from "./TemplatePrompt";
 import TemplateBadge from "./TemplateBadge";
 
@@ -103,6 +103,9 @@ export default function TicketCreator({ config, template, onSaveTemplate, getHea
   const [projectKey, setProjectKey] = useState("");
   const [projects, setProjects] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
+  const [issueTypes, setIssueTypes] = useState([]);
+  const [selectedIssueType, setSelectedIssueType] = useState("");
+  const [loadingIssueTypes, setLoadingIssueTypes] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createdTicket, setCreatedTicket] = useState(null);
   const [createError, setCreateError] = useState(null);
@@ -146,11 +149,33 @@ export default function TicketCreator({ config, template, onSaveTemplate, getHea
     try {
       const list = await fetchProjects(getHeaders());
       setProjects(list);
-      if (list.length > 0) setProjectKey(list[0].key);
+      if (list.length > 0) {
+        setProjectKey(list[0].key);
+        await loadIssueTypes(list[0].key);
+      }
     } catch {
       /* handled silently — user sees empty dropdown */
     } finally {
       setLoadingProjects(false);
+    }
+  };
+
+  const loadIssueTypes = async (projKey) => {
+    setLoadingIssueTypes(true);
+    try {
+      const types = await fetchIssueTypes(projKey, getHeaders());
+      setIssueTypes(types);
+      // Extract type from AI-generated result or default to first available
+      const typeMatch = result?.match(/^type:\s*(\w+)/im);
+      const extractedType = typeMatch ? typeMatch[1] : null;
+      const matchingType = types.find(t => t.name === extractedType);
+      setSelectedIssueType(matchingType ? matchingType.name : (types[0]?.name || "Task"));
+    } catch (e) {
+      console.error("Failed to load issue types", e);
+      setIssueTypes([{ id: "default", name: "Task" }]);
+      setSelectedIssueType("Task");
+    } finally {
+      setLoadingIssueTypes(false);
     }
   };
 
@@ -183,13 +208,11 @@ Rules:
     const summary =
       summaryLine.replace(/^summary:\s*/i, "").trim() ||
       description.slice(0, 100);
-    const typeMatch = result.match(/^type:\s*(\w+)/im);
-    const issueType = typeMatch ? typeMatch[1] : "Task";
     try {
       const ticket = await createTicket(
         {
           project_key: projectKey,
-          issue_type: issueType,
+          issue_type: selectedIssueType,
           summary,
           description: result,
           priority: "Medium",
@@ -403,7 +426,10 @@ Rules:
                 <>
                   <select
                     value={projectKey}
-                    onChange={(e) => setProjectKey(e.target.value)}
+                    onChange={async (e) => {
+                      setProjectKey(e.target.value);
+                      await loadIssueTypes(e.target.value);
+                    }}
                     className="bg-[#0d1117] text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-blue-500"
                   >
                     {projects.map((p) => (
@@ -412,9 +438,23 @@ Rules:
                       </option>
                     ))}
                   </select>
+                  {issueTypes.length > 0 && (
+                    <select
+                      value={selectedIssueType}
+                      onChange={(e) => setSelectedIssueType(e.target.value)}
+                      disabled={loadingIssueTypes}
+                      className="bg-[#0d1117] text-gray-200 text-sm rounded-lg px-3 py-2 border border-gray-700 focus:outline-none focus:border-blue-500"
+                    >
+                      {issueTypes.map((t) => (
+                        <option key={t.id} value={t.name}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <button
                     onClick={handleCreateInJira}
-                    disabled={creating || !projectKey}
+                    disabled={creating || !projectKey || loadingIssueTypes}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white text-sm rounded-lg transition-colors flex items-center gap-2"
                   >
                     {creating ? (

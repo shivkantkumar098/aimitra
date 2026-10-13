@@ -21,6 +21,7 @@ from services.jira_service import (
     add_comment,
     check_rovo_available,
     create_ticket,
+    get_issue_types,
     get_projects,
     get_ticket,
     search_issues,
@@ -200,5 +201,24 @@ async def list_projects(
     try:
         projects = await get_projects(x_jira_domain, x_jira_email, x_jira_token)
         return {"projects": projects}
+    except Exception as e:
+        _handle_jira_error(e)
+
+
+@router.get("/projects/{project_key}/issuetypes")
+async def list_issue_types(
+    project_key: str,
+    x_jira_domain: str = Header(...),
+    x_jira_email: str = Header(...),
+    x_jira_token: str = Header(...),
+):
+    """
+    Lists all available issue types for a specific JIRA project.
+    Different projects can have different issue types (Bug, Story, Task, Epic, etc.).
+    This endpoint is essential for validating issue type before ticket creation.
+    """
+    try:
+        issue_types = await get_issue_types(x_jira_domain, x_jira_email, x_jira_token, project_key)
+        return {"issueTypes": issue_types}
     except Exception as e:
         _handle_jira_error(e)

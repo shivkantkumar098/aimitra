@@ -113,3 +113,8 @@ temp/
 # ========================
 AiMitra_Documentation.pdf
 AiMitra_Documentation.docx
+
+# ========================
+# Copilot hook logs
+# ========================
+.github/hooks/logs/

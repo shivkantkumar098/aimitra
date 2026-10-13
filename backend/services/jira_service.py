@@ -91,10 +91,13 @@ async def check_rovo_available(domain: str) -> bool:
     url = f"{domain_clean}/gateway/api/assist/chat/v1/chat"
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
-            response = await client.get(url)
+            response = await client.get(url, follow_redirects=False)
             # 401 = endpoint exists (Rovo licensed, just needs OAuth not API token)
             # 405 = method not allowed but endpoint exists → also means licensed
             return response.status_code in (401, 405)
+    except httpx.HTTPStatusError as e:
+        # Handle 405 from httpx raising it as an exception
+        return e.response.status_code in (401, 405)
     except Exception:
         return False
 
@@ -262,6 +265,42 @@ async def get_projects(domain: str, email: str, api_token: str) -> list[dict]:
     return [
         {"key": p.get("key"), "name": p.get("name"), "id": p.get("id")}
         for p in data
+    ]
+
+
+async def get_issue_types(domain: str, email: str, api_token: str, project_key: str) -> list[dict]:
+    """
+    Returns all available issue types for a specific JIRA project.
+    This is critical because each project can have different issue types configured.
+
+    Returns a list of issue types with their names and IDs.
+    Example: [{"id": "10001", "name": "Bug"}, {"id": "10002", "name": "Story"}]
+    """
+    url = f"{_base_url(domain)}/issue/createmeta"
+    params = {
+        "projectKeys": project_key.upper(),
+        "expand": "projects.issuetypes"
+    }
+
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        response = await client.get(url, headers=_auth_header(email, api_token), params=params)
+        response.raise_for_status()
+        data = response.json()
+
+    # Extract issue types from the project metadata
+    projects = data.get("projects", [])
+    if not projects:
+        return []
+
+    issue_types = projects[0].get("issuetypes", [])
+    return [
+        {
+            "id": it.get("id"),
+            "name": it.get("name"),
+            "subtask": it.get("subtask", False),
+        }
+        for it in issue_types
+        if not it.get("subtask", False)  # Exclude subtasks
     ]
 
 

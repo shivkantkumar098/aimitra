@@ -45,3 +45,9 @@ export async function fetchProjects(headers) {
   const res = await axios.get(`${API_BASE}/api/jira/projects`, { headers });
   return res.data.projects;
 }
+
+/** Returns all available issue types for a specific project. */
+export async function fetchIssueTypes(projectKey, headers) {
+  const res = await axios.get(`${API_BASE}/api/jira/projects/${projectKey}/issuetypes`, { headers });
+  return res.data.issueTypes;
+}

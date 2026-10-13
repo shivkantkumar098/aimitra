@@ -36,6 +36,12 @@ export function useAiQuery(config, toolMeta = null) {
 
   const query = useCallback(
     async (systemPrompt, userMessage, imageData = null) => {
+      console.log("[useAiQuery] Config check:", {
+        hasApiKey: !!config.apiKey,
+        provider: config.provider,
+        apiKeysPresent: Object.keys(config.apiKeys || {}).filter(k => config.apiKeys[k]).length
+      });
+
       if (!config.apiKey) {
         setError("No API key configured. Please set it in the sidebar.");
         return;

@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-08T11:12:08.165Z",
+    "rangeLabel": "all",
+    "agents": [
+      "claude"
+    ],
+    "projectFilter": "all",
+    "totals": {
+      "sessions": 1,
+      "durationMs": 0,
+      "turns": 0,
+      "files": 0,
+      "netLines": 0,
+      "toolCallsTotal": 0,
+      "toolSuccessRate": 0,
+      "totalCostUSD": 0.6174264,
+      "cacheReadCostUSD": 0.09618440000000002,
+      "pricedSessions": 1
+    },
+    "unpricedModels": [],
+    "estimatedModels": [],
+    "localModels": [],
+    "coverage": [
+      {
+        "agentName": "claude",
+        "total": 1,
+        "priced": 1,
+        "withLog": 1
+      }
+    ],
+    "userEmail": "shivkant_kumar@epam.com",
+    "periodStart": "2026-10-08T11:06:47.836Z",
+    "periodEnd": "2026-10-08T11:06:47.836Z"
+  },
+  "sessions": [
+    {
+      "sessionId": "579f7600-26c0-44fd-b593-e49411be6cba",
+      "agentName": "claude",
+      "provider": "ai-run-sso",
+      "title": "",
+      "project": "C:\\Golu\\AI\\qa-assitant-ai",
+      "branch": "Unknown",
+      "startTime": 1791457607836,
+      "durationMs": 0,
+      "turns": 0,
+      "fileOps": 0,
+      "linesAdded": 0,
+      "linesRemoved": 0,
+      "linesModified": 0,
+      "netLines": 0,
+      "filesChanged": 0,
+      "filesWritten": 0,
+      "filesEdited": 0,
+      "toolCallsTotal": 0,
+      "toolCallsSuccess": 0,
+      "toolCallsFailure": 0,
+      "models": [],
+      "languages": [],
+      "tools": [],
+      "tokens": {
+        "input": 16,
+        "output": 30635,
+        "cacheRead": 480922,
+        "cacheCreation": 53715,
+        "cacheCreation1h": 53715,
+        "total": 565288
+      },
+      "costUSD": 0.6174264,
+      "cacheReadCostUSD": 0.09618440000000002,
+      "perModelCost": [
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 2,
+            "output": 389,
+            "cacheRead": 32616,
+            "cacheCreation": 18048,
+            "cacheCreation1h": 18048,
+            "total": 51055
+          },
+          "costUSD": 0.08260920000000001,
+          "unpriced": false
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "tokens": {
+            "input": 14,
+            "output": 30246,
+            "cacheRead": 448306,
+            "cacheCreation": 35667,
+            "cacheCreation1h": 35667,
+            "total": 514233
+          },
+          "costUSD": 0.5348172,
+          "unpriced": false
+        }
+      ],
+      "hadLog": true,
+      "agentSessionFile": "C:\\Users\\shivkant_kumar\\.claude\\projects\\C--Golu-AI-qa-assitant-ai\\e69bcb54-df67-4317-9aac-6afcb853f871.jsonl",
+      "costSeries": [
+        {
+          "t": 1791457652354,
+          "cost": 0.08260920000000001,
+          "tokens": 51055
+        },
+        {
+          "t": 1791457664529,
+          "cost": 0.11138800000000001,
+          "tokens": 104865
+        },
+        {
+          "t": 1791457724526,
+          "cost": 0.2132714,
+          "tokens": 168233
+        },
+        {
+          "t": 1791457814280,
+          "cost": 0.3216118,
+          "tokens": 238318
+        },
+        {
+          "t": 1791457833507,
+          "cost": 0.3906706,
+          "tokens": 311973
+        },
+        {
+          "t": 1791457867906,
+          "cost": 0.4738012,
+          "tokens": 391896
+        },
+        {
+          "t": 1791457893709,
+          "cost": 0.5614952,
+          "tokens": 477291
+        },
+        {
+          "t": 1791457905343,
+          "cost": 0.6174263999999999,
+          "tokens": 565288
+        }
+      ],
+      "costSource": "native-estimate",
+      "costBasis": "standard-api-tokens",
+      "dispatchesComplete": true,
+      "rootOwnCostUSD": 0.6174264,
+      "unlinkedCostUSD": 0,
+      "unlinkedAgentIds": [],
+      "rootOwnTokens": {
+        "input": 16,
+        "output": 30635,
+        "cacheRead": 480922,
+        "cacheCreation": 53715,
+        "cacheCreation1h": 53715,
+        "total": 565288
+      },
+      "unlinkedTokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheCreation": 0,
+        "cacheCreation1h": 0,
+        "total": 0
+      },
+      "modelTimeline": [
+        {
+          "t": 1791457652354,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0826092,
+          "tokens": 51055
+        },
+        {
+          "t": 1791457664529,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0287788,
+          "tokens": 53810
+        },
+        {
+          "t": 1791457724526,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1018834,
+          "tokens": 63368
+        },
+        {
+          "t": 1791457814280,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.1083404,
+          "tokens": 70085
+        },
+        {
+          "t": 1791457833507,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0690588,
+          "tokens": 73655
+        },
+        {
+          "t": 1791457867906,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0831306,
+          "tokens": 79923
+        },
+        {
+          "t": 1791457893709,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.087694,
+          "tokens": 85395
+        },
+        {
+          "t": 1791457905343,
+          "model": "claude-sonnet-5-5",
+          "costUSD": 0.0559312,
+          "tokens": 87997
+        }
+      ],
+      "routedTurnsPct": 0,
+      "skillInvocations": [],
+      "agentInvocations": [],
+      "commandInvocations": [],
+      "sessionSource": "Pure chat"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+"Add a dark mode toggle to the frontend app. Users should be able to switch between light and dark themes from the top-right settings area. The theme should persist across page reloads. Acceptance criteria: toggle visible in the UI, selection persists, and default theme is light."
+
+Bug fix request
+"Fix the bug where the chat API fails when the user sends an empty message. Expected behavior: empty messages should be rejected with a user-friendly validation error instead of calling the backend. Actual behavior: backend gets empty text and returns an error. Acceptance criteria: empty input is blocked in UI and backend validation returns 400."
+Backend improvement
+"Add backend validation for the chat endpoint so request payloads without a message field return a clear validation error. Acceptance criteria: missing or empty message returns 400 with a message like 'message is required', and frontend still works for valid requests."
+UI improvement
+"Improve the sidebar in the frontend by adding a search box to filter the available AI models. Acceptance criteria: typing in the search box filters the model list in real time, and clear text restores the full list."
+Full SDLC-ready requirement
+"Implement a 'Save conversation as text file' feature in the frontend. Users can click a download button on the chat screen to export the current conversation as a .txt file. Acceptance criteria: button is visible in the chat header, exported file includes all messages in order, and the feature works in the browser without backend changes."
+If you want the pipeline to analyze a specific area
+"Review and fix the Jira integration in the frontend and backend. The issue is that the Jira bug creator form is not showing the expected issue types. Acceptance criteria: form loads the available issue types correctly, and the selected type is sent with the request."
+Minimal input if you just want the workflow to proceed
+"I want to fix a bug in the chat input validation flow. Empty messages should be blocked and the backend should return a 400."
