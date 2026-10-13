@@ -118,3 +118,11 @@ AiMitra_Documentation.docx
 # Copilot hook logs
 # ========================
 .github/hooks/logs/
+
+# ========================
+# Agentic SDLC (state + PR body are local workflow records, not part of the commit)
+# ========================
+docs/sdlc/*/workflow-state.json
+docs/sdlc/*/workflow-state.json.lock
+docs/sdlc/*/workflow-state.json.*.tmp
+docs/sdlc/*/pr-draft.md

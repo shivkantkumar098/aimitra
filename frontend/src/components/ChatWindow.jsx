@@ -25,6 +25,7 @@ import WelcomeScreen from "./WelcomeScreen";
 import ChatInput from "./ChatInput";
 import { CAPABILITIES } from "../utils/capabilities";
 import DomLocatorGenerator from "./devtools/DomLocatorGenerator";
+import ThemeToggle from "./ThemeToggle";
 
 export default function ChatWindow({
   messages,
@@ -36,6 +37,8 @@ export default function ChatWindow({
   setActiveView,
   onNewChat,
   onToggleSidebar,
+  theme,
+  onThemeChange,
   config = {},
 }) {
   const bottomRef = useRef(null);
@@ -76,15 +79,18 @@ export default function ChatWindow({
             </p>
           </div>
         </div>
-        <button
-          onClick={onNewChat}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-ui)] hover:bg-[var(--bg-ui-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs rounded-xl border border-[var(--border-primary)] transition-all"
-        >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
-          </svg>
-          New Chat
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-ui)] hover:bg-[var(--bg-ui-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] text-xs rounded-xl border border-[var(--border-primary)] transition-all"
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
+            </svg>
+            New Chat
+          </button>
+          <ThemeToggle theme={theme} onChange={onThemeChange} />
+        </div>
       </header>
 
       {/* DOM Locator — full tool UI replaces chat body */}

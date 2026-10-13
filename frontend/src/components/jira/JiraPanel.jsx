@@ -9,6 +9,7 @@ import AskRovo from "./AskRovo";
 import JiraConnect from "./JiraConnect";
 import { useJiraTemplates } from "../../hooks/useJiraTemplates";
 import { useJiraAuth } from "../../hooks/useJiraAuth";
+import ThemeToggle from "../ThemeToggle";
 
 const TABS = [
   { id: "rovo",    label: "Ask Jira AI",       icon: "🤖", desc: "AI assistant for JIRA & agile questions" },
@@ -30,7 +31,7 @@ const SIDEBAR_MODE_MAP = {
   jira_comment:  "comment",
 };
 
-export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
+export default function JiraPanel({ config, activeMode, onToggleSidebar, theme, onThemeChange }) {
   const [activeTab, setActiveTab] = useState("rovo");
   const prevMode = useRef(activeMode);
 
@@ -54,12 +55,12 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="px-4 md:px-6 py-4 border-b border-gray-800 bg-[#0d0d1a] flex-shrink-0">
-        <div className="flex items-center justify-between">
+      <header className="px-4 md:px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
-              className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-ui)] rounded-lg transition-colors"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
                 <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
@@ -67,45 +68,48 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
             </button>
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold text-white">J</div>
             <div>
-              <h2 className="text-sm font-semibold text-white">JIRA Tools</h2>
-              <p className="text-xs text-gray-500">AI-powered ticket management</p>
+              <h2 className="text-sm font-semibold text-[var(--text-heading)]">JIRA Tools</h2>
+              <p className="text-xs text-[var(--text-faint)]">AI-powered ticket management</p>
             </div>
           </div>
 
           {/* Connection status */}
-          {jiraAuth.connected ? (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                {jiraAuth.user?.avatarUrl && (
-                  <img src={jiraAuth.user.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
-                )}
-                <div className="text-right">
-                  <p className="text-xs text-white font-medium">{jiraAuth.user?.displayName}</p>
-                  <p className="text-xs text-gray-500">{jiraAuth.domain?.replace("https://", "")}</p>
+          <div className="flex items-center gap-1 sm:gap-3">
+            {jiraAuth.connected ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  {jiraAuth.user?.avatarUrl && (
+                    <img src={jiraAuth.user.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
+                  )}
+                  <div className="text-right">
+                    <p className="text-xs text-[var(--text-heading)] font-medium">{jiraAuth.user?.displayName}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{jiraAuth.domain?.replace("https://", "")}</p>
+                  </div>
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full" title="Connected" />
                 </div>
-                <span className="w-2 h-2 bg-emerald-400 rounded-full" title="Connected" />
+                <button
+                  onClick={disconnect}
+                  className="text-xs px-2 py-1 bg-[var(--bg-ui)] hover:bg-[var(--bg-ui-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg border border-[var(--border-primary)] transition-colors"
+                >
+                  Disconnect
+                </button>
               </div>
+            ) : (
               <button
-                onClick={disconnect}
-                className="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-lg border border-gray-700 transition-colors"
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/30 hover:border-amber-500/60 rounded-lg transition-all"
               >
-                Disconnect
+                <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+                Not connected — click to connect
               </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 border border-amber-500/30 hover:border-amber-500/60 rounded-lg transition-all"
-            >
-              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
-              Not connected — click to connect
-            </button>
-          )}
+            )}
+            <ThemeToggle theme={theme} onChange={onThemeChange} />
+          </div>
         </div>
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-1 px-6 py-3 border-b border-gray-800 bg-[#0d0d1a] flex-shrink-0 overflow-x-auto">
+      <div className="flex gap-1 px-6 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] flex-shrink-0 overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -114,7 +118,7 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all ${
               activeTab === tab.id
                 ? "bg-blue-600/20 text-blue-300 border border-blue-600/40"
-                : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                : "text-[var(--text-muted)] hover:bg-[var(--bg-ui)] hover:text-[var(--text-primary)]"
             }`}
           >
             <span>{tab.icon}</span>
@@ -193,11 +197,11 @@ export default function JiraPanel({ config, activeMode, onToggleSidebar }) {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowAuthModal(false); }}
         >
-          <div className="relative w-full max-w-lg mx-4 bg-[#0d0d1a] border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="relative w-full max-w-lg mx-4 bg-[var(--bg-base)] border border-[var(--border-primary)] rounded-2xl shadow-2xl overflow-hidden">
             {/* Close button */}
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors z-10"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors z-10"
               title="Close"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">

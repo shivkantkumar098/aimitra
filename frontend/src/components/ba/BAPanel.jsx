@@ -9,6 +9,7 @@ import GapAnalysis from "./GapAnalysis";
 import StakeholderUpdate from "./StakeholderUpdate";
 import MeetingSummarizer from "./MeetingSummarizer";
 import ImpactAnalysis from "./ImpactAnalysis";
+import ThemeToggle from "../ThemeToggle";
 
 const TOOLS = [
   { id: "ba_user_story",   icon: "📖", label: "User Story Generator",   component: UserStoryGen },
@@ -23,27 +24,30 @@ const TOOLS = [
   { id: "ba_impact",       icon: "💥", label: "Impact Analysis",         component: ImpactAnalysis },
 ];
 
-export default function BAPanel({ config, activeMode, setActiveMode, onToggleSidebar }) {
+export default function BAPanel({ config, activeMode, setActiveMode, onToggleSidebar, theme, onThemeChange }) {
   const activeTool = TOOLS.find((t) => t.id === activeMode) || TOOLS[0];
   const ActiveComponent = activeTool.component;
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-[#0d0d1a]">
+    <div className="flex h-full w-full overflow-hidden bg-[var(--bg-base)]">
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="px-4 md:px-6 py-4 border-b border-gray-800/80 flex items-center gap-3 flex-shrink-0 animate-fade-in">
-          <button
-            onClick={onToggleSidebar}
-            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-              <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <span className="text-2xl animate-scale-in">{activeTool.icon}</span>
-          <div>
-            <h2 className="text-base font-bold text-white">{activeTool.label}</h2>
-            <p className="text-xs text-gray-500">Business Analyst toolkit</p>
+        <div className="px-4 md:px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between gap-3 flex-shrink-0 animate-fade-in">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={onToggleSidebar}
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-heading)] hover:bg-[var(--bg-ui)] rounded-lg transition-colors flex-shrink-0"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <span className="text-2xl animate-scale-in">{activeTool.icon}</span>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-[var(--text-heading)] truncate">{activeTool.label}</h2>
+              <p className="text-xs text-[var(--text-faint)]">Business Analyst toolkit</p>
+            </div>
           </div>
+          <ThemeToggle theme={theme} onChange={onThemeChange} />
         </div>
         <div key={activeTool.id} className="flex-1 overflow-y-auto px-6 py-5 animate-scale-in">
           <ActiveComponent config={config} />

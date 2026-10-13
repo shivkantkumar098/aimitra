@@ -17,6 +17,7 @@
 import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "qa_assistant_config";
+const THEMES = new Set(["dark", "midnight", "forest", "light"]);
 
 // Defaults used for first-time visitors or after localStorage.clear()
 const defaultConfig = {
@@ -30,7 +31,7 @@ const defaultConfig = {
   },
   temperature: 0.7,
   streaming: true,
-  theme: "dark",
+  theme: "light",
 };
 
 export function useConfig() {
@@ -52,7 +53,9 @@ export function useConfig() {
           delete parsed.apiKey;
         }
         // Merge with defaults so new keys added in future updates don't break
-        return { ...defaultConfig, ...parsed, apiKeys: { ...defaultConfig.apiKeys, ...parsed.apiKeys } };
+        const config = { ...defaultConfig, ...parsed, apiKeys: { ...defaultConfig.apiKeys, ...parsed.apiKeys } };
+        if (!THEMES.has(config.theme)) config.theme = "light";
+        return config;
       }
     } catch { /* corrupted storage — use defaults */ }
     return defaultConfig;

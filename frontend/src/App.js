@@ -20,7 +20,7 @@
  *   Ctrl+3 — jira panel
  *   Ctrl+4 — ba panel
  */
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import JiraPanel from "./components/jira/JiraPanel";
@@ -40,8 +40,8 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showImageGenWarning, setShowImageGenWarning] = useState(false);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = config.theme || "dark";
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = config.theme || "light";
   }, [config.theme]);
 
   // Global keyboard shortcuts
@@ -244,6 +244,8 @@ export default function App() {
           setActiveView={handleSetView}
           onNewChat={handleNewChat}
           onToggleSidebar={toggleSidebar}
+          theme={config.theme}
+          onThemeChange={(theme) => updateConfig({ theme })}
           config={config}
         />
       ) : activeView === "devtools" ? (
@@ -253,6 +255,8 @@ export default function App() {
             activeMode={activeMode}
             setActiveMode={setActiveMode}
             onToggleSidebar={toggleSidebar}
+            theme={config.theme}
+            onThemeChange={(theme) => updateConfig({ theme })}
           />
         </div>
       ) : activeView === "ba" ? (
@@ -262,6 +266,8 @@ export default function App() {
             activeMode={activeMode}
             setActiveMode={setActiveMode}
             onToggleSidebar={toggleSidebar}
+            theme={config.theme}
+            onThemeChange={(theme) => updateConfig({ theme })}
           />
         </div>
       ) : (
@@ -270,6 +276,8 @@ export default function App() {
             config={effectiveConfig}
             activeMode={activeMode}
             onToggleSidebar={toggleSidebar}
+            theme={config.theme}
+            onThemeChange={(theme) => updateConfig({ theme })}
           />
         </div>
       )}
